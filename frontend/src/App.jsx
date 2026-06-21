@@ -1,0 +1,118 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Pages
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import Asset from './pages/Asset';
+import BorrowHistory from './pages/BorrowHistory';
+import Profile from './pages/Profile';
+import About from './pages/About';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminBorrowRequest from './pages/admin/AdminBorrowRequest';
+import AdminAssetsManagement from './pages/admin/AdminAssetsManagement';
+
+// Styles
+import './styles/global.css';
+import './App.css';
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <div className="app">
+          <Header />
+
+          <main className="main-content">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/about" element={<About />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/assets"
+                element={
+                  <ProtectedRoute>
+                    <Asset />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/borrow-history"
+                element={
+                  <ProtectedRoute>
+                    <BorrowHistory />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin Routes */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/borrow-requests"
+                element={
+                  <ProtectedRoute>
+                    <AdminBorrowRequest />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/assets"
+                element={
+                  <ProtectedRoute>
+                    <AdminAssetsManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+
+          <Footer />
+        </div>
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;

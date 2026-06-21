@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Extension Cord",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Marker",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Ballpen",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Scissors",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Stapler",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Glue gun",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Puncher",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Scotch tape",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Cutter",
+    "category": "Office Supplies",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Wire: Dupont, solid wires",
+    "category": "Lab Equipments",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Pliers",
+    "category": "Lab Equipments",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Soldering Iron",
+    "category": "Lab Equipments",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "RJ45",
+    "category": "Lab Equipments",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "name": "Cables",
+    "category": "Lab Equipments",
+    "availability": true,
+    "created_at": "2026-06-20T00:00:00Z"
+  }
+]

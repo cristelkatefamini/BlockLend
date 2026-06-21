@@ -1,0 +1,91 @@
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+  padding: var(--spacing-lg);
+}
+
+.auth-card {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-2xl);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.auth-header h1 {
+  color: var(--primary-blue);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.auth-header h2 {
+  color: var(--gray);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+}
+
+.auth-form {
+  margin-bottom: var(--spacing-xl);
+}
+
+.auth-form .form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  font-weight: var(--font-weight-regular);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.auth-form button {
+  width: 100%;
+}
+
+.auth-footer {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.auth-footer p {
+  margin-bottom: 0;
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+}
+
+.auth-footer a {
+  color: var(--accent-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
+.auth-footer a:hover {
+  color: var(--primary-blue);
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    padding: var(--spacing-lg);
+  }
+
+  .auth-header h1 {
+    font-size: 1.5rem;
+  }
+}

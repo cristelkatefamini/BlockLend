@@ -1,0 +1,206 @@
+.about-container {
+  padding-bottom: var(--spacing-2xl);
+}
+
+.about-hero {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+  color: var(--white);
+  padding: 80px var(--spacing-lg);
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.about-hero h1 {
+  color: var(--white);
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.about-hero p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.about-section {
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-lg);
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.about-section h2 {
+  color: var(--primary-blue);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--accent-blue);
+  padding-bottom: var(--spacing-md);
+}
+
+.about-section p {
+  color: var(--gray);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: var(--spacing-md);
+}
+
+.problem-list,
+.solution-list {
+  list-style: none;
+  margin: var(--spacing-lg) 0;
+}
+
+.problem-list li,
+.solution-list li {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background-color: var(--light-blue);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  color: var(--dark-gray);
+}
+
+.features-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.feature-item {
+  padding: var(--spacing-lg);
+  background-color: var(--light-blue);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent-blue);
+}
+
+.feature-item h4 {
+  color: var(--primary-blue);
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-item p {
+  margin: 0;
+  color: var(--gray);
+}
+
+.workflow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  overflow-x: auto;
+  padding: var(--spacing-lg) 0;
+}
+
+.workflow-step {
+  flex-shrink: 0;
+  text-align: center;
+  padding: var(--spacing-lg);
+  background-color: var(--light-blue);
+  border-radius: var(--radius-md);
+  min-width: 150px;
+  border: 2px solid var(--accent-blue);
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--accent-blue);
+  color: var(--white);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+}
+
+.workflow-step h4 {
+  color: var(--primary-blue);
+  margin-bottom: var(--spacing-sm);
+}
+
+.workflow-step p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+}
+
+.workflow-arrow {
+  color: var(--accent-blue);
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.tech-grid,
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.tech-card,
+.benefit-card {
+  padding: var(--spacing-lg);
+  background-color: var(--light-blue);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--accent-blue);
+}
+
+.tech-card h4,
+.benefit-card h4 {
+  color: var(--primary-blue);
+  margin-bottom: var(--spacing-md);
+}
+
+.tech-card p,
+.benefit-card p {
+  margin: 0;
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+}
+
+.benefit-icon {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--success);
+  margin-bottom: var(--spacing-md);
+}
+
+.cta-section {
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+  color: var(--white);
+}
+
+.cta-section h2 {
+  color: var(--white);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.cta-section p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .about-hero h1 {
+    font-size: 2rem;
+  }
+
+  .workflow {
+    flex-direction: column;
+  }
+
+  .workflow-arrow {
+    display: none;
+  }
+
+  .tech-grid,
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}

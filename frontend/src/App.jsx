@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -6,7 +6,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Landing from './pages/Landing';
-import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Asset from './pages/Asset';
@@ -23,18 +22,18 @@ import AdminAssetsManagement from './pages/admin/AdminAssetsManagement';
 import './styles/global.css';
 import './App.css';
 
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <div className="app">
-          <Header />
+function AppLayout() {
+  const location = useLocation();
+  const isPublicMarketingPage = ['/', '/register'].includes(location.pathname);
 
-          <main className="main-content">
-            <Routes>
+  return (
+    <div className="app">
+      {!isPublicMarketingPage && <Header />}
+
+      <main className="main-content">
+        <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/about" element={<About />} />
 
@@ -106,10 +105,18 @@ function App() {
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </main>
+      </main>
 
-          <Footer />
-        </div>
+      {!isPublicMarketingPage && <Footer />}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppLayout />
       </AuthProvider>
     </Router>
   );

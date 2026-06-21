@@ -17,8 +17,8 @@ export default function ProtectedRoute({ children }) {
       <div className="protected-error">
         <h2>Access Denied</h2>
         <p>You need to be logged in to access this page.</p>
-        <a href="/login" className="btn btn-primary">
-          Go to Login
+        <a href="/" className="btn btn-primary">
+          Go to Sign In
         </a>
       </div>
     );

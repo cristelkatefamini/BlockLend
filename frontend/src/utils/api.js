@@ -29,8 +29,11 @@ export const authAPI = {
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data) => api.put('/users/profile', data),
+  changePassword: (data) => api.put('/users/change-password', data),
+  deleteAccount: () => api.delete('/users/profile'),
   getUserHistory: () => api.get('/users/history'),
   getAllUsers: () => api.get('/users'),
+  toggleUserStatus: (id) => api.put(`/users/${id}/toggle-status`),
 };
 
 // Asset endpoints
@@ -48,7 +51,8 @@ export const borrowAPI = {
   getBorrowRequest: (id) => api.get(`/borrow/${id}`),
   createBorrowRequest: (data) => api.post('/borrow', data),
   approveBorrow: (id) => api.post(`/borrow/${id}/approve`),
-  rejectBorrow: (id) => api.post(`/borrow/${id}/reject`),
+  declineBorrow: (id) => api.post(`/borrow/${id}/decline`),
+  rejectBorrow: (id) => api.post(`/borrow/${id}/decline`),
   returnAsset: (id, data) => api.post(`/borrow/${id}/return`, data),
   getBorrowHistory: () => api.get('/borrow/history'),
 };
@@ -62,8 +66,14 @@ export const penaltyAPI = {
 
 // Transaction endpoints
 export const transactionAPI = {
-  getTransactions: () => api.get('/transactions'),
-  getTransaction: (id) => api.get(`/transactions/${id}`),
+  getNetworkInfo: () => api.get('/blockchain/network-info'),
+  getContractInfo: () => api.get('/blockchain/contract-info'),
+  getTransactions: (borrowId = null) =>
+    api.get('/blockchain/transactions', {
+      params: borrowId ? { borrow_id: borrowId } : {},
+    }),
+  recordTransaction: (data) => api.post('/blockchain/transactions', data),
+  getTransactionReceipt: (txHash) => api.post('/blockchain/transaction-receipt', { tx_hash: txHash }),
 };
 
 export default api;

@@ -114,6 +114,9 @@ async def login(user: UserLogin):
         
         if not user_doc:
             raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        if user_doc.get("is_active") is False:
+            raise HTTPException(status_code=403, detail="Your account has been deactivated")
         
         # Verify password - note: check_password_hash takes (stored_hash, provided_password)
         if not verify_password(user_doc.get("password_hash", ""), user.password):

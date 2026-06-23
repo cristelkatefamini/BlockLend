@@ -11,7 +11,6 @@ export default function AdminBorrowRequest() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is admin
     if (user?.role !== 'admin') {
       navigate('/home');
       return;
@@ -22,32 +21,73 @@ export default function AdminBorrowRequest() {
 
   const loadBorrowRequests = async () => {
     try {
-      // TODO: Fetch from API when endpoint is ready
-      // For now, showing empty state
-      setLoading(false);
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/borrow', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to load borrow requests (${response.status})`);
+      }
+
+      const data = await response.json();
+      const requestList = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+          ? data.data
+          : [];
+
+      setBorrows(requestList);
     } catch (err) {
       console.error('Failed to load borrow requests:', err);
+      setBorrows([]);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleApprove = async (borrowId) => {
     try {
-      // TODO: Call API to approve borrow request
-      console.log('Approved borrow:', borrowId);
-      loadBorrowRequests();
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/borrow/${borrowId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to approve borrow request');
+      }
+
+      await loadBorrowRequests();
     } catch (err) {
       console.error('Failed to approve:', err);
+      alert('Failed to approve borrow request.');
     }
   };
 
   const handleDecline = async (borrowId) => {
     try {
-      // TODO: Call API to decline borrow request
-      console.log('Declined borrow:', borrowId);
-      loadBorrowRequests();
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/borrow/${borrowId}/decline`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to decline borrow request');
+      }
+
+      await loadBorrowRequests();
     } catch (err) {
       console.error('Failed to decline:', err);
+      alert('Failed to decline borrow request.');
     }
   };
 
@@ -118,10 +158,10 @@ export default function AdminBorrowRequest() {
               </thead>
               <tbody>
                 {filteredBorrows.map(borrow => (
-                  <tr key={borrow.id}>
-                    <td>{borrow.borrower}</td>
-                    <td>{borrow.asset}</td>
-                    <td>{borrow.requestDate}</td>
+                  <tr key={borrow.id || borrow._id}>
+                    <td>{borrow.borrowerName || borrow.borrowerId || 'Unknown'}</td>
+                    <td>{borrow.assetName || 'Unknown Asset'}</td>
+                    <td>{borrow.requestDate ? new Date(borrow.requestDate).toLocaleString() : 'N/A'}</td>
                     <td>
                       <span className={`status-badge ${getStatusBadge(borrow.status)}`}>
                         {borrow.status}
@@ -132,13 +172,13 @@ export default function AdminBorrowRequest() {
                         <>
                           <button 
                             className="btn-approve"
-                            onClick={() => handleApprove(borrow.id)}
+                            onClick={() => handleApprove(borrow.id || borrow._id)}
                           >
                             Approve
                           </button>
                           <button 
                             className="btn-decline"
-                            onClick={() => handleDecline(borrow.id)}
+                            onClick={() => handleDecline(borrow.id || borrow._id)}
                           >
                             Decline
                           </button>

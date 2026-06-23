@@ -4,6 +4,7 @@ import '../styles/pages/Asset.css';
 
 export default function Asset() {
   const [assets, setAssets] = useState([]);
+  const [filteredAssets, setFilteredAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -11,6 +12,8 @@ export default function Asset() {
   const [borrowDays, setBorrowDays] = useState(7);
   const [borrowReason, setBorrowReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAssetType, setSelectedAssetType] = useState('all');
 
   useEffect(() => {
     fetchAssets();
@@ -27,15 +30,32 @@ export default function Asset() {
           : [];
       const availableAssets = assetsData.filter(asset => asset.in_stock && asset.quantity > 0);
       setAssets(availableAssets);
+      setFilteredAssets(availableAssets);
       setError('');
     } catch (err) {
       setError('Failed to load assets');
       console.error(err);
       setAssets([]);
+      setFilteredAssets([]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const nextAssets = assets.filter((asset) => {
+      const matchesSearch = !term ||
+        asset.name?.toLowerCase().includes(term) ||
+        asset.description?.toLowerCase().includes(term) ||
+        asset.asset_type?.toLowerCase().includes(term);
+
+      const matchesType = selectedAssetType === 'all' || asset.asset_type === selectedAssetType;
+      return matchesSearch && matchesType;
+    });
+
+    setFilteredAssets(nextAssets);
+  }, [searchTerm, selectedAssetType, assets]);
 
   const handleBorrowSubmit = async (e) => {
     e.preventDefault();
@@ -79,9 +99,34 @@ export default function Asset() {
 
         {error && <div className="alert alert-danger">{error}</div>}
 
+        <div className="filter-section" style={{ marginBottom: '1rem' }}>
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search assets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <div className="filter-group">
+            <label>Asset Type:</label>
+            <select
+              value={selectedAssetType}
+              onChange={(e) => setSelectedAssetType(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Types</option>
+              {[...new Set(assets.map(asset => asset.asset_type).filter(Boolean))].map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <div className="assets-grid">
-          {assets.length > 0 ? (
-            assets.map(asset => (
+          {filteredAssets.length > 0 ? (
+            filteredAssets.map(asset => (
               <div key={asset._id} className="asset-card">
                 <div className="asset-image">
                   {asset.image_url ? (
@@ -118,7 +163,7 @@ export default function Asset() {
             ))
           ) : (
             <div className="empty-state">
-              <p>No assets available at the moment</p>
+              <p>No assets match your search or filter.</p>
             </div>
           )}
         </div>

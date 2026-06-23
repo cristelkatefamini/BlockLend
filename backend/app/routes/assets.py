@@ -32,11 +32,12 @@ async def get_assets(
         # Convert ObjectId to string for JSON serialization and add default fields
         for asset in assets:
             asset["_id"] = str(asset["_id"])
-            # Add default quantity and in_stock if missing (for backward compatibility)
-            if "quantity" not in asset:
-                asset["quantity"] = 1
-            if "in_stock" not in asset:
-                asset["in_stock"] = asset.get("quantity", 1) > 0
+            try:
+                quantity = int(asset.get("quantity", 1) or 1)
+            except (TypeError, ValueError):
+                quantity = 1
+            asset["quantity"] = quantity
+            asset["in_stock"] = quantity > 0
         
         return {
             "success": True,
@@ -64,11 +65,12 @@ async def get_asset(
             raise HTTPException(status_code=404, detail="Asset not found")
         
         asset["_id"] = str(asset["_id"])
-        # Add default quantity and in_stock if missing (for backward compatibility)
-        if "quantity" not in asset:
-            asset["quantity"] = 1
-        if "in_stock" not in asset:
-            asset["in_stock"] = asset.get("quantity", 1) > 0
+        try:
+            quantity = int(asset.get("quantity", 1) or 1)
+        except (TypeError, ValueError):
+            quantity = 1
+        asset["quantity"] = quantity
+        asset["in_stock"] = quantity > 0
         
         return {
             "success": True,

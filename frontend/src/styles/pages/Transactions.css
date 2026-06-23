@@ -1,0 +1,66 @@
+.transactions-page {
+  padding: 2rem 0;
+}
+
+.transaction-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card,
+.receipt-checker,
+.transactions-table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.receipt-checker form {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.receipt-checker input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.receipt-checker button {
+  padding: 0.75rem 1rem;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.receipt-result {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f7f7f7;
+  border-radius: 8px;
+}
+
+.receipt-result.error {
+  background: #fff5f5;
+  color: #b42318;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}

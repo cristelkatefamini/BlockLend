@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { borrowAPI } from '../utils/api';
+import { borrowAPI, transactionAPI } from '../utils/api';
 import '../styles/pages/BorrowHistory.css';
 
 export default function BorrowHistory() {
@@ -8,6 +8,8 @@ export default function BorrowHistory() {
   const [error, setError] = useState('');
   const [selectedBorrow, setSelectedBorrow] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [borrowTransactions, setBorrowTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [returnData, setReturnData] = useState({
     condition: 'good',
     notes: '',
@@ -33,6 +35,24 @@ export default function BorrowHistory() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBorrowTransactions = async (borrowId) => {
+    if (!borrowId) return;
+
+    try {
+      setLoadingTransactions(true);
+      const response = await transactionAPI.getTransactions(borrowId);
+      const data = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
+      setBorrowTransactions(data);
+    } catch (err) {
+      console.error('Failed to load borrow transactions:', err);
+      setBorrowTransactions([]);
+    } finally {
+      setLoadingTransactions(false);
     }
   };
 
@@ -107,17 +127,21 @@ export default function BorrowHistory() {
                         className="btn-action"
                         onClick={() => {
                           setSelectedBorrow(borrow);
+                          setBorrowTransactions([]);
                           setShowModal(true);
+                          fetchBorrowTransactions(borrow._id || borrow.id);
                         }}
                       >
                         Details
                       </button>
-                      {borrow.status === 'active' && (
+                      {(borrow.status === 'active' || borrow.status === 'approved') && (
                         <button
                           className="btn-action btn-return"
                           onClick={() => {
                             setSelectedBorrow(borrow);
+                            setBorrowTransactions([]);
                             setShowModal(true);
+                            fetchBorrowTransactions(borrow._id || borrow.id);
                           }}
                         >
                           Return
@@ -170,7 +194,25 @@ export default function BorrowHistory() {
                   </p>
                 </div>
 
-                {selectedBorrow.status === 'active' && (
+                <div className="detail-group">
+                  <label>Blockchain Transactions</label>
+                  {loadingTransactions ? (
+                    <p>Loading transactions...</p>
+                  ) : borrowTransactions.length > 0 ? (
+                    <ul className="transaction-list">
+                      {borrowTransactions.map((tx) => (
+                        <li key={tx.id || tx._id}>
+                          <span className="tx-hash">{tx.tx_hash || tx.transaction_hash || 'N/A'}</span>
+                          <span className="tx-status">{tx.status || 'pending'}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No blockchain transactions recorded for this order yet.</p>
+                  )}
+                </div>
+
+                {(selectedBorrow.status === 'active' || selectedBorrow.status === 'approved') && (
                   <form onSubmit={handleReturnSubmit}>
                     <div className="form-group">
                       <label htmlFor="condition">Asset Condition</label>

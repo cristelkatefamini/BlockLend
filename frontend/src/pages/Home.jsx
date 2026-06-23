@@ -21,8 +21,17 @@ export default function Home() {
         assetAPI.getAssets(),
       ]);
 
-      const borrows = borrowRes.data || [];
-      const assets = assetsRes.data || [];
+      const borrows = Array.isArray(borrowRes.data)
+        ? borrowRes.data
+        : Array.isArray(borrowRes.data?.data)
+          ? borrowRes.data.data
+          : [];
+
+      const assets = Array.isArray(assetsRes.data?.data)
+        ? assetsRes.data.data
+        : Array.isArray(assetsRes.data)
+          ? assetsRes.data
+          : [];
 
       setStats({
         totalAssets: assets.length,

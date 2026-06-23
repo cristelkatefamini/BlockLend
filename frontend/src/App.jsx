@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Asset from './pages/Asset';
 import BorrowHistory from './pages/BorrowHistory';
+import Transactions from './pages/Transactions';
 import Profile from './pages/Profile';
 import About from './pages/About';
 
@@ -17,6 +18,7 @@ import About from './pages/About';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBorrowRequest from './pages/admin/AdminBorrowRequest';
 import AdminAssetsManagement from './pages/admin/AdminAssetsManagement';
+import AdminUsersManagement from './pages/admin/AdminUsersManagement';
 
 // Styles
 import './styles/global.css';
@@ -66,6 +68,15 @@ function AppLayout() {
               />
 
               <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/profile"
                 element={
                   <ProtectedRoute>
@@ -98,6 +109,15 @@ function AppLayout() {
                 element={
                   <ProtectedRoute>
                     <AdminAssetsManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute>
+                    <AdminUsersManagement />
                   </ProtectedRoute>
                 }
               />

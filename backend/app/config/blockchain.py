@@ -1,22 +1,24 @@
 from web3 import Web3
 import json
 import os
+from pathlib import Path
 
 class BlockchainConfig:
     """Blockchain configuration and utilities"""
     
     def __init__(self):
-        self.rpc_url = "http://127.0.0.1:7545"
+        self.rpc_url = os.getenv("BLOCKCHAIN_RPC_URL", "http://127.0.0.1:7545")
+        self.repo_root = Path(__file__).resolve().parents[3]
         self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
         self.contract_abi = self._load_contract_abi()
-        self.contract_address = self._load_contract_address()
+        self.contract_address = os.getenv("BLOCKCHAIN_CONTRACT_ADDRESS") or self._load_contract_address()
     
     def _load_contract_abi(self):
         """Load contract ABI from file"""
         try:
-            abi_path = os.path.join(os.path.dirname(__file__), '../../blockchain/abi/BlobkLendABI.json')
-            if os.path.exists(abi_path):
-                with open(abi_path, 'r') as f:
+            abi_path = self.repo_root / "blockchain" / "abi" / "BlobkLendABI.json"
+            if abi_path.exists():
+                with abi_path.open('r', encoding='utf-8') as f:
                     return json.load(f)
         except Exception as e:
             print(f"Warning: Could not load contract ABI: {e}")
@@ -25,10 +27,9 @@ class BlockchainConfig:
     def _load_contract_address(self):
         """Load contract address from file"""
         try:
-            addr_path = os.path.join(os.path.dirname(__file__), '../../blockchain/contract_info/contract_address.txt')
-            if os.path.exists(addr_path):
-                with open(addr_path, 'r') as f:
-                    return f.read().strip()
+            addr_path = self.repo_root / "blockchain" / "contract_info" / "contract_address.txt"
+            if addr_path.exists():
+                return addr_path.read_text(encoding='utf-8').strip()
         except Exception as e:
             print(f"Warning: Could not load contract address: {e}")
         return None

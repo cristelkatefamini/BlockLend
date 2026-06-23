@@ -12,6 +12,7 @@ class Database:
     def connect(self):
         """Connect to MongoDB"""
         mongodb_url = os.getenv('DATABASE_URL', 'mongodb://localhost:27017')
+        db_name = os.getenv('DB_NAME', 'BlockLend')
         try:
             # Connect with server API version
             self.client = MongoClient(
@@ -21,8 +22,8 @@ class Database:
             )
             # Verify connection
             self.client.admin.command('ping')
-            self.db = self.client.get_database()
-            print("✓ Connected to MongoDB")
+            self.db = self.client.get_database(db_name)
+            print(f"✓ Connected to MongoDB database: {db_name}")
             return True
         except Exception as e:
             print(f"✗ MongoDB connection failed: {e}")

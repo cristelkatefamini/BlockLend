@@ -1,6 +1,5 @@
 from config.blockchain import blockchain_config
 from web3 import Web3
-from flask import current_app
 import json
 
 class BlockchainService:
@@ -10,8 +9,8 @@ class BlockchainService:
         self.config = blockchain_config
     
     def get_web3_instance(self):
-        """Get Web3 instance"""
-        rpc_url = current_app.config.get('BLOCKCHAIN_RPC_URL', 'http://127.0.0.1:7545')
+        """Get Web3 instance using the configured RPC endpoint."""
+        rpc_url = self.config.rpc_url
         return self.config.get_web3_instance(rpc_url)
     
     def verify_address(self, address):
@@ -37,7 +36,7 @@ class BlockchainService:
             transaction = {
                 'nonce': nonce,
                 'to': to_address,
-                'value': Web3.to_wei(amount, 'ether'),
+                'value': Web3.toWei(amount, 'ether'),
                 'gas': 21000,
                 'gasPrice': gas_price,
                 'from': from_address

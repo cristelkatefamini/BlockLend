@@ -18,6 +18,7 @@ export default function Header() {
             <>
               <Link to="/home" className="nav-link">Home</Link>
               <Link to="/assets" className="nav-link">Assets</Link>
+              <Link to="/transactions" className="nav-link">Transactions</Link>
               {user?.role !== 'admin' && (
                 <Link to="/borrow-history" className="nav-link">Borrow History</Link>
               )}
@@ -28,6 +29,7 @@ export default function Header() {
                     <Link to="/admin/dashboard" className="dropdown-link">Dashboard</Link>
                     <Link to="/admin/borrow-requests" className="dropdown-link">Borrow Requests</Link>
                     <Link to="/admin/assets" className="dropdown-link">Assets Management</Link>
+                    <Link to="/admin/users" className="dropdown-link">Users Management</Link>
                   </div>
                 </div>
               )}

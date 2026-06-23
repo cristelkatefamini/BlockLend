@@ -69,6 +69,7 @@ async def register(user: UserRegister):
             "credit_score": 0.0,
             "wallet_address": None,
             "is_active": True,
+            "late_return_warnings": 0,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -116,7 +117,13 @@ async def login(user: UserLogin):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         if user_doc.get("is_active") is False:
-            raise HTTPException(status_code=403, detail="Your account has been deactivated")
+            detail = "Your account has been deactivated"
+            if user_doc.get("late_return_warnings", 0) >= 3:
+                detail = (
+                    "Your account has been deactivated due to 3 late-return warnings. "
+                    "Please contact an administrator."
+                )
+            raise HTTPException(status_code=403, detail=detail)
         
         # Verify password - note: check_password_hash takes (stored_hash, provided_password)
         if not verify_password(user_doc.get("password_hash", ""), user.password):

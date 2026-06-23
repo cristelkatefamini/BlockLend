@@ -26,6 +26,7 @@ def serialize_user(user_doc):
         "credit_score": user_doc.get("credit_score", 0.0),
         "wallet_address": user_doc.get("wallet_address"),
         "is_active": user_doc.get("is_active", True),
+        "late_return_warnings": user_doc.get("late_return_warnings", 0),
         "created_at": user_doc.get("created_at"),
         "updated_at": user_doc.get("updated_at"),
     }

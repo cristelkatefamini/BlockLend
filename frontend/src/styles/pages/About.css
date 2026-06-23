@@ -1,194 +1,223 @@
 .about-container {
-  padding-bottom: var(--spacing-2xl);
+  padding-bottom: 3rem;
 }
 
 .about-hero {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
-  color: var(--white);
-  padding: 80px var(--spacing-lg);
+  background: var(--landing-navy);
+  color: #ffffff;
+  padding: 3.5rem 2.5rem;
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 2rem;
 }
 
 .about-hero h1 {
-  color: var(--white);
-  font-size: 3rem;
-  margin-bottom: var(--spacing-md);
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.65rem;
 }
 
 .about-hero p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
   margin: 0;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.about-container .container {
+  max-width: 1180px;
+  padding: 0 2.5rem;
 }
 
 .about-section {
-  margin-bottom: var(--spacing-2xl);
-  padding: var(--spacing-lg);
-  background-color: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  margin-bottom: 1.25rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid #e8e8e8;
 }
 
 .about-section h2 {
-  color: var(--primary-blue);
-  font-size: 2rem;
-  margin-bottom: var(--spacing-lg);
-  border-bottom: 2px solid var(--accent-blue);
-  padding-bottom: var(--spacing-md);
+  color: var(--landing-navy);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.65rem;
 }
 
 .about-section p {
-  color: var(--gray);
-  font-size: 1.05rem;
-  line-height: 1.8;
-  margin-bottom: var(--spacing-md);
+  color: #666666;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 0.85rem;
 }
 
 .problem-list,
 .solution-list {
   list-style: none;
-  margin: var(--spacing-lg) 0;
+  margin: 1rem 0;
 }
 
 .problem-list li,
 .solution-list li {
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  background-color: var(--light-blue);
-  border-left: 4px solid var(--accent-blue);
-  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+  background-color: #fafafa;
+  border-left: 3px solid var(--landing-orange);
   color: var(--dark-gray);
+  font-size: 0.9rem;
 }
 
 .features-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .feature-item {
-  padding: var(--spacing-lg);
-  background-color: var(--light-blue);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--accent-blue);
+  padding: 1.15rem;
+  background-color: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-left: 3px solid var(--landing-heading-blue);
 }
 
 .feature-item h4 {
-  color: var(--primary-blue);
-  margin-bottom: var(--spacing-md);
+  color: var(--landing-navy);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .feature-item p {
   margin: 0;
-  color: var(--gray);
+  color: #666666;
+  font-size: 0.875rem;
 }
 
 .workflow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  gap: 0.75rem;
+  margin-top: 1rem;
   overflow-x: auto;
-  padding: var(--spacing-lg) 0;
+  padding: 0.85rem 0;
 }
 
 .workflow-step {
   flex-shrink: 0;
   text-align: center;
-  padding: var(--spacing-lg);
-  background-color: var(--light-blue);
-  border-radius: var(--radius-md);
-  min-width: 150px;
-  border: 2px solid var(--accent-blue);
+  padding: 1rem;
+  background-color: #fafafa;
+  border: 1px solid #e8e8e8;
+  min-width: 140px;
 }
 
 .step-number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--accent-blue);
-  color: var(--white);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-md);
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  background-color: var(--landing-orange);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.65rem;
 }
 
 .workflow-step h4 {
-  color: var(--primary-blue);
-  margin-bottom: var(--spacing-sm);
+  color: var(--landing-navy);
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
 }
 
 .workflow-step p {
   margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--gray);
+  font-size: 0.8rem;
+  color: #888888;
 }
 
 .workflow-arrow {
-  color: var(--accent-blue);
-  font-size: 2rem;
+  color: var(--landing-heading-blue);
+  font-size: 1.5rem;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .tech-grid,
 .benefits-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .tech-card,
 .benefit-card {
-  padding: var(--spacing-lg);
-  background-color: var(--light-blue);
-  border-radius: var(--radius-md);
-  border: 2px solid var(--accent-blue);
+  padding: 1.15rem;
+  background-color: #fafafa;
+  border: 1px solid #e8e8e8;
 }
 
 .tech-card h4,
 .benefit-card h4 {
-  color: var(--primary-blue);
-  margin-bottom: var(--spacing-md);
+  color: var(--landing-navy);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .tech-card p,
 .benefit-card p {
   margin: 0;
-  color: var(--gray);
-  font-size: var(--font-size-sm);
+  color: #666666;
+  font-size: 0.875rem;
 }
 
 .benefit-icon {
   display: block;
-  font-size: 1.5rem;
-  color: var(--success);
-  margin-bottom: var(--spacing-md);
+  font-size: 1.25rem;
+  color: var(--landing-orange);
+  margin-bottom: 0.5rem;
 }
 
 .cta-section {
   text-align: center;
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-  color: var(--white);
+  background: var(--landing-navy);
+  color: #ffffff;
+  border: none;
 }
 
 .cta-section h2 {
-  color: var(--white);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .cta-section p {
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: var(--spacing-lg);
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1rem;
+}
+
+.cta-section .btn-primary {
+  border-radius: 0;
 }
 
 @media (max-width: 768px) {
+  .about-hero {
+    padding: 2.5rem 1.25rem;
+  }
+
   .about-hero h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
+  }
+
+  .about-container .container {
+    padding: 0 1.25rem;
   }
 
   .workflow {

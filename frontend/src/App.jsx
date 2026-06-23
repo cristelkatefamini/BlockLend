@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Landing from './pages/Landing';
+import LandingLoggedIn from './pages/LandingLoggedIn';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Asset from './pages/Asset';
@@ -24,9 +25,12 @@ import AdminUsersManagement from './pages/admin/AdminUsersManagement';
 import './styles/global.css';
 import './App.css';
 
+import { useAuth } from './context/AuthContext';
+
 function AppLayout() {
   const location = useLocation();
-  const isPublicMarketingPage = ['/', '/register'].includes(location.pathname);
+  const { isAuthenticated } = useAuth();
+  const isPublicMarketingPage = ['/', '/register'].includes(location.pathname) && !isAuthenticated;
 
   return (
     <div className="app">
@@ -35,7 +39,7 @@ function AppLayout() {
       <main className="main-content">
         <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={isAuthenticated ? <LandingLoggedIn /> : <Landing />} />
               <Route path="/register" element={<Register />} />
               <Route path="/about" element={<About />} />
 

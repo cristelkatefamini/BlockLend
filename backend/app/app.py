@@ -90,6 +90,7 @@ from routes.assets import router as assets_router
 from routes.admin import router as admin_router
 from routes.borrow import router as borrow_router
 from routes.blockchain import router as blockchain_router
+from routes.penalty_routes import router as penalty_router
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])
@@ -97,6 +98,7 @@ app.include_router(assets_router, tags=["assets"])
 app.include_router(admin_router, tags=["admin"])
 app.include_router(borrow_router, tags=["borrow"])
 app.include_router(blockchain_router, tags=["blockchain"])
+app.include_router(penalty_router, tags=["penalties"])
 
 if __name__ == '__main__':
     import uvicorn

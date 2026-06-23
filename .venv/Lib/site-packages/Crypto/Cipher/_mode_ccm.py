@@ -54,6 +54,10 @@ def enum(**enums):
 MacStatus = enum(NOT_STARTED=0, PROCESSING_AUTH_DATA=1, PROCESSING_PLAINTEXT=2)
 
 
+class CCMMessageTooLongError(ValueError):
+    pass
+
+
 class CcmMode(object):
     """Counter with CBC-MAC (CCM).
 
@@ -141,9 +145,14 @@ class CcmMode(object):
                              " and in the range 4..16 (not %d)" % mac_len)
 
         # Nonce value
-        if not (nonce and 7 <= len(nonce) <= 13):
+        if not (7 <= len(nonce) <= 13):
             raise ValueError("Length of parameter 'nonce' must be"
                              " in the range 7..13 bytes")
+
+        # Message length (if known already)
+        q = 15 - len(nonce)  # length of Q, the encoded message length
+        if msg_len and len(long_to_bytes(msg_len)) > q:
+            raise CCMMessageTooLongError("Message too long for a %u-byte nonce" % len(nonce))
 
         # Create MAC object (the tag will be the last block
         # bytes worth of ciphertext)
@@ -155,8 +164,8 @@ class CcmMode(object):
         self._t = None
 
         # Allowed transitions after initialization
-        self._next = [self.update, self.encrypt, self.decrypt,
-                      self.digest, self.verify]
+        self._next = ["update", "encrypt", "decrypt",
+                      "digest", "verify"]
 
         # Cumulative lengths
         self._cumul_assoc_len = 0
@@ -168,7 +177,6 @@ class CcmMode(object):
         self._cache = []
 
         # Start CTR cipher, by formatting the counter (A.3)
-        q = 15 - len(nonce)  # length of Q, the encoded message length
         self._cipher = self._factory.new(key,
                                          self._factory.MODE_CTR,
                                          nonce=struct.pack("B", q - 1) + self.nonce,
@@ -188,9 +196,10 @@ class CcmMode(object):
         assert(isinstance(self._cache, list))
 
         # Formatting control information and nonce (A.2.1)
-        q = 15 - len(self.nonce)  # length of Q, the encoded message length
-        flags = (64 * (self._assoc_len > 0) + 8 * ((self._mac_len - 2) // 2) +
-                 (q - 1))
+        q = 15 - len(self.nonce)  # length of Q, the encoded message length (2..8)
+        flags = (self._assoc_len > 0) << 6
+        flags |= ((self._mac_len - 2) // 2) << 3
+        flags |= q - 1
         b_0 = struct.pack("B", flags) + self.nonce + long_to_bytes(self._msg_len, q)
 
         # Formatting associated data (A.2.2)
@@ -252,12 +261,12 @@ class CcmMode(object):
             A piece of associated data. There are no restrictions on its size.
         """
 
-        if self.update not in self._next:
+        if "update" not in self._next:
             raise TypeError("update() can only be called"
                             " immediately after initialization")
 
-        self._next = [self.update, self.encrypt, self.decrypt,
-                      self.digest, self.verify]
+        self._next = ["update", "encrypt", "decrypt",
+                      "digest", "verify"]
 
         self._cumul_assoc_len += len(assoc_data)
         if self._assoc_len is not None and \
@@ -336,10 +345,10 @@ class CcmMode(object):
           Otherwise, ``None``.
         """
 
-        if self.encrypt not in self._next:
+        if "encrypt" not in self._next:
             raise TypeError("encrypt() can only be called after"
                             " initialization or an update()")
-        self._next = [self.encrypt, self.digest]
+        self._next = ["encrypt", "digest"]
 
         # No more associated data allowed from now
         if self._assoc_len is None:
@@ -354,13 +363,19 @@ class CcmMode(object):
         # Only once piece of plaintext accepted if message length was
         # not declared in advance
         if self._msg_len is None:
+            q = 15 - len(self.nonce)
+            if len(long_to_bytes(len(plaintext))) > q:
+                raise CCMMessageTooLongError("Message too long for a %u-byte nonce" % len(self.nonce))
+
             self._msg_len = len(plaintext)
             self._start_mac()
-            self._next = [self.digest]
+            self._next = ["digest"]
 
         self._cumul_msg_len += len(plaintext)
         if self._cumul_msg_len > self._msg_len:
-            raise ValueError("Message is too long")
+            msg = "Message longer than declared for (%u bytes vs %u bytes" % \
+                  (self._cumul_msg_len, self._msg_len)
+            raise CCMMessageTooLongError(msg)
 
         if self._mac_status == MacStatus.PROCESSING_AUTH_DATA:
             # Associated data is concatenated with the least number
@@ -409,10 +424,10 @@ class CcmMode(object):
           Otherwise, ``None``.
         """
 
-        if self.decrypt not in self._next:
+        if "decrypt" not in self._next:
             raise TypeError("decrypt() can only be called"
                             " after initialization or an update()")
-        self._next = [self.decrypt, self.verify]
+        self._next = ["decrypt", "verify"]
 
         # No more associated data allowed from now
         if self._assoc_len is None:
@@ -427,13 +442,19 @@ class CcmMode(object):
         # Only once piece of ciphertext accepted if message length was
         # not declared in advance
         if self._msg_len is None:
+            q = 15 - len(self.nonce)
+            if len(long_to_bytes(len(ciphertext))) > q:
+                raise CCMMessageTooLongError("Message too long for a %u-byte nonce" % len(self.nonce))
+
             self._msg_len = len(ciphertext)
             self._start_mac()
-            self._next = [self.verify]
+            self._next = ["verify"]
 
         self._cumul_msg_len += len(ciphertext)
         if self._cumul_msg_len > self._msg_len:
-            raise ValueError("Message is too long")
+            msg = "Message longer than declared for (%u bytes vs %u bytes" % \
+                  (self._cumul_msg_len, self._msg_len)
+            raise CCMMessageTooLongError(msg)
 
         if self._mac_status == MacStatus.PROCESSING_AUTH_DATA:
             # Associated data is concatenated with the least number
@@ -461,10 +482,10 @@ class CcmMode(object):
         :Return: the MAC, as a byte string.
         """
 
-        if self.digest not in self._next:
+        if "digest" not in self._next:
             raise TypeError("digest() cannot be called when decrypting"
                             " or validating a message")
-        self._next = [self.digest]
+        self._next = ["digest"]
         return self._digest()
 
     def _digest(self):
@@ -523,10 +544,10 @@ class CcmMode(object):
             or the key is incorrect.
         """
 
-        if self.verify not in self._next:
+        if "verify" not in self._next:
             raise TypeError("verify() cannot be called"
                             " when encrypting a message")
-        self._next = [self.verify]
+        self._next = ["verify"]
 
         self._digest()
         secret = get_random_bytes(16)

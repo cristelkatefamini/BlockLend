@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { borrowAPI, transactionAPI } from '../utils/api';
+import { borrowAPI, transactionAPI, penaltyAPI } from '../utils/api';
 import '../styles/pages/BorrowHistory.css';
 
 export default function BorrowHistory() {
   const [borrows, setBorrows] = useState([]);
+  const [penaltyInfo, setPenaltyInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedBorrow, setSelectedBorrow] = useState(null);
@@ -18,7 +19,17 @@ export default function BorrowHistory() {
 
   useEffect(() => {
     fetchBorrowHistory();
+    fetchPenaltyInfo();
   }, []);
+
+  const fetchPenaltyInfo = async () => {
+    try {
+      const response = await penaltyAPI.getPenalties();
+      setPenaltyInfo(response.data || null);
+    } catch (err) {
+      console.error('Failed to load penalty info:', err);
+    }
+  };
 
   const fetchBorrowHistory = async () => {
     try {
@@ -68,6 +79,7 @@ export default function BorrowHistory() {
       setSelectedBorrow(null);
       setReturnData({ condition: 'good', notes: '' });
       await fetchBorrowHistory();
+      await fetchPenaltyInfo();
     } catch (err) {
       alert(err.response?.data?.detail || err.response?.data?.message || 'Failed to submit return');
     } finally {
@@ -93,13 +105,23 @@ export default function BorrowHistory() {
 
         {error && <div className="alert alert-danger">{error}</div>}
 
+        {penaltyInfo && penaltyInfo.late_return_warnings > 0 && (
+          <div className={`alert ${penaltyInfo.late_return_warnings >= 3 ? 'alert-danger' : 'alert-warning'}`}>
+            {penaltyInfo.late_return_warnings >= 3
+              ? 'Your account has been deactivated due to 3 late-return warnings. Contact an administrator.'
+              : `Late return warnings: ${penaltyInfo.late_return_warnings} of 3. Return overdue items to avoid account deactivation.`}
+          </div>
+        )}
+
         {borrows.length > 0 ? (
           <div className="history-table-wrapper">
             <table className="history-table">
               <thead>
                 <tr>
                   <th>Asset Name</th>
+                  <th>Qty</th>
                   <th>Borrow Date</th>
+                  <th>Due Date</th>
                   <th>Return Date</th>
                   <th>Status</th>
                   <th>Trust Points</th>
@@ -110,7 +132,9 @@ export default function BorrowHistory() {
                 {borrows.map(borrow => (
                   <tr key={borrow._id} className={`status-${borrow.status}`}>
                     <td className="asset-name">{borrow.assetName}</td>
+                    <td>{borrow.quantity ?? 1}</td>
                     <td>{new Date(borrow.borrowDate).toLocaleDateString()}</td>
+                    <td>{borrow.due_date ? new Date(borrow.due_date).toLocaleDateString() : '-'}</td>
                     <td>{borrow.returnDate ? new Date(borrow.returnDate).toLocaleDateString() : '-'}</td>
                     <td>
                       <span className={`badge badge-${getBadgeColor(borrow.status)}`}>
@@ -176,8 +200,18 @@ export default function BorrowHistory() {
                 </div>
 
                 <div className="detail-group">
+                  <label>Quantity Borrowed</label>
+                  <p>{selectedBorrow.quantity ?? 1}</p>
+                </div>
+
+                <div className="detail-group">
                   <label>Borrow Date</label>
                   <p>{new Date(selectedBorrow.borrowDate).toLocaleDateString()}</p>
+                </div>
+
+                <div className="detail-group">
+                  <label>Due Date</label>
+                  <p>{selectedBorrow.due_date ? new Date(selectedBorrow.due_date).toLocaleDateString() : 'Pending approval'}</p>
                 </div>
 
                 <div className="detail-group">

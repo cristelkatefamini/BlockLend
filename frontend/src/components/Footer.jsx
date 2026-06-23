@@ -1,6 +1,9 @@
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Footer.css';
 
 export default function Footer() {
+  const { isAuthenticated } = useAuth();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -14,9 +17,16 @@ export default function Footer() {
         <div className="footer-section">
           <h5>Quick Links</h5>
           <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/">Sign In</a></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/about">About</Link></li>
+            {isAuthenticated ? (
+              <>
+                <li><Link to="/home">Dashboard</Link></li>
+                <li><Link to="/profile">Profile</Link></li>
+              </>
+            ) : (
+              <li><Link to="/">Sign In</Link></li>
+            )}
           </ul>
         </div>
 

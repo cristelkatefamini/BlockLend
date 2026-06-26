@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
+import { exportUsersPDF } from '../../utils/pdfReport';
 import '../../styles/pages/Admin.css';
 
 export default function AdminUsersManagement() {
@@ -88,8 +89,19 @@ export default function AdminUsersManagement() {
     <div className="admin-container">
       <div className="container">
         <div className="admin-header">
-          <h1>User Management</h1>
-          <p>Activate, deactivate, or permanently delete user accounts</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1>User Management</h1>
+              <p>Activate, deactivate, or permanently delete user accounts</p>
+            </div>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => exportUsersPDF(users)}
+              disabled={loading || users.length === 0}
+            >
+              ⬇ Export PDF
+            </button>
+          </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}

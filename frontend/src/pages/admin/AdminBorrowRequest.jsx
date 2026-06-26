@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { borrowAPI, transactionAPI, userAPI } from '../../utils/api';
+import { exportBorrowsPDF } from '../../utils/pdfReport';
 import '../../styles/pages/Admin.css';
 
 export default function AdminBorrowRequest() {
@@ -25,7 +26,6 @@ export default function AdminBorrowRequest() {
       navigate('/home');
       return;
     }
-
     loadBorrowRequests();
   }, [user, navigate]);
 
@@ -78,13 +78,10 @@ export default function AdminBorrowRequest() {
 
   const fetchBorrowTransactions = async (borrowId) => {
     if (!borrowId) return;
-
     try {
       setLoadingTransactions(true);
       const response = await transactionAPI.getTransactions(borrowId);
-      const data = Array.isArray(response.data?.data)
-        ? response.data.data
-        : [];
+      const data = Array.isArray(response.data?.data) ? response.data.data : [];
       setBorrowTransactions(data);
     } catch (err) {
       console.error('Failed to load borrow transactions:', err);
@@ -102,13 +99,11 @@ export default function AdminBorrowRequest() {
 
   const openUserDetails = async (borrowerId) => {
     if (!borrowerId) return;
-
     const cached = userLookup[borrowerId];
     if (cached) {
       setDetailUser(cached);
       return;
     }
-
     setLoadingUser(true);
     setDetailUser(null);
     try {
@@ -135,32 +130,25 @@ export default function AdminBorrowRequest() {
 
   const getBorrowerName = (borrow) => {
     const profile = getBorrowerProfile(borrow);
-    if (profile) {
-      return profile.full_name || profile.username || 'Unknown';
-    }
+    if (profile) return profile.full_name || profile.username || 'Unknown';
     return borrow.borrowerName || borrow.borrowerUsername || getBorrowerId(borrow) || 'Unknown';
   };
 
   const getBorrowerTrustScore = (borrow) => {
     const profile = getBorrowerProfile(borrow);
-    if (profile) {
-      return profile.trust_score ?? profile.credit_score ?? 0;
-    }
+    if (profile) return profile.trust_score ?? profile.credit_score ?? 0;
     return borrow.borrowerTrustScore ?? borrow.borrower_trust_score ?? 0;
   };
 
   const getBorrowerWarningCount = (borrow) => {
     const profile = getBorrowerProfile(borrow);
-    if (profile) {
-      return profile.warning_count ?? 0;
-    }
+    if (profile) return profile.warning_count ?? 0;
     return borrow.borrowerWarningCount ?? borrow.borrower_warning_count ?? 0;
   };
 
   const handleConfirmReturn = async (e) => {
     e.preventDefault();
     if (!confirmBorrow) return;
-
     setConfirmSubmitting(true);
     try {
       await borrowAPI.confirmReturn(confirmBorrow.id || confirmBorrow._id, confirmData);
@@ -196,8 +184,19 @@ export default function AdminBorrowRequest() {
     <div className="admin-container">
       <div className="container">
         <div className="admin-header">
-          <h1>Borrow Requests Management</h1>
-          <p>Review and manage all borrow requests</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1>Borrow Requests Management</h1>
+              <p>Review and manage all borrow requests</p>
+            </div>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => exportBorrowsPDF(borrows)}
+              disabled={loading || borrows.length === 0}
+            >
+              ⬇ Export PDF
+            </button>
+          </div>
         </div>
 
         <div className="filter-section">
@@ -270,10 +269,7 @@ export default function AdminBorrowRequest() {
                       </span>
                     </td>
                     <td className="action-buttons">
-                      <button
-                        className="btn-details"
-                        onClick={() => openDetails(borrow)}
-                      >
+                      <button className="btn-details" onClick={() => openDetails(borrow)}>
                         Details
                       </button>
                       {borrow.status === 'pending' && (
@@ -331,46 +327,28 @@ export default function AdminBorrowRequest() {
                     </button>
                   </p>
                 </div>
-
                 <div className="detail-group">
                   <label>Asset</label>
                   <p>{detailBorrow.assetName || 'Unknown Asset'}</p>
                 </div>
-
                 <div className="detail-group">
                   <label>Request Date</label>
-                  <p>
-                    {detailBorrow.requestDate
-                      ? new Date(detailBorrow.requestDate).toLocaleString()
-                      : 'N/A'}
-                  </p>
+                  <p>{detailBorrow.requestDate ? new Date(detailBorrow.requestDate).toLocaleString() : 'N/A'}</p>
                 </div>
-
                 <div className="detail-group">
                   <label>Borrow Date</label>
-                  <p>
-                    {detailBorrow.borrowDate
-                      ? new Date(detailBorrow.borrowDate).toLocaleString()
-                      : 'N/A'}
-                  </p>
+                  <p>{detailBorrow.borrowDate ? new Date(detailBorrow.borrowDate).toLocaleString() : 'N/A'}</p>
                 </div>
-
                 {detailBorrow.due_date && (
                   <div className="detail-group">
                     <label>Due Date</label>
                     <p>{new Date(detailBorrow.due_date).toLocaleString()}</p>
                   </div>
                 )}
-
                 <div className="detail-group">
                   <label>Return Date</label>
-                  <p>
-                    {detailBorrow.returnDate
-                      ? new Date(detailBorrow.returnDate).toLocaleString()
-                      : 'Pending'}
-                  </p>
+                  <p>{detailBorrow.returnDate ? new Date(detailBorrow.returnDate).toLocaleString() : 'Pending'}</p>
                 </div>
-
                 <div className="detail-group">
                   <label>Status</label>
                   <p>
@@ -379,21 +357,18 @@ export default function AdminBorrowRequest() {
                     </span>
                   </p>
                 </div>
-
                 {detailBorrow.reason && (
                   <div className="detail-group">
                     <label>Borrow Reason</label>
                     <p>{detailBorrow.reason}</p>
                   </div>
                 )}
-
                 {detailBorrow.return_notes && (
                   <div className="detail-group">
                     <label>User Return Notes</label>
                     <p>{detailBorrow.return_notes}</p>
                   </div>
                 )}
-
                 {detailBorrow.status === 'completed' && (
                   <>
                     <div className="detail-group">
@@ -403,17 +378,13 @@ export default function AdminBorrowRequest() {
                           <span className={`status-badge condition-${detailBorrow.condition}`}>
                             {formatCondition(detailBorrow.condition)}
                           </span>
-                        ) : (
-                          'Not recorded'
-                        )}
+                        ) : 'Not recorded'}
                       </p>
                     </div>
-
                     <div className="detail-group">
                       <label>Admin Notes</label>
                       <p>{detailBorrow.admin_return_notes || 'No notes provided'}</p>
                     </div>
-
                     <div className="detail-group">
                       <label>Trust Points</label>
                       <p className={detailBorrow.trustPoints >= 0 ? 'trust-positive' : 'trust-negative'}>
@@ -422,7 +393,6 @@ export default function AdminBorrowRequest() {
                     </div>
                   </>
                 )}
-
                 <div className="detail-group">
                   <label>Blockchain Transactions</label>
                   {loadingTransactions ? (
@@ -473,7 +443,6 @@ export default function AdminBorrowRequest() {
                         </span>
                       </div>
                     </div>
-
                     <div className="user-detail-stats">
                       <div className="user-detail-stat">
                         <span className="user-detail-stat-label">Trust Score</span>
@@ -494,44 +463,18 @@ export default function AdminBorrowRequest() {
                         <span>{detailUser.on_time_returns ?? 0}</span>
                       </div>
                     </div>
-
-                    <div className="detail-group">
-                      <label>Email</label>
-                      <p>{detailUser.email || '-'}</p>
-                    </div>
-                    <div className="detail-group">
-                      <label>Phone</label>
-                      <p>{detailUser.phone_number || '-'}</p>
-                    </div>
-                    <div className="detail-group">
-                      <label>Department</label>
-                      <p>{detailUser.department || '-'}</p>
-                    </div>
-                    <div className="detail-group">
-                      <label>Section</label>
-                      <p>{detailUser.section || '-'}</p>
-                    </div>
-                    <div className="detail-group">
-                      <label>Address</label>
-                      <p>{detailUser.address || '-'}</p>
-                    </div>
+                    <div className="detail-group"><label>Email</label><p>{detailUser.email || '-'}</p></div>
+                    <div className="detail-group"><label>Phone</label><p>{detailUser.phone_number || '-'}</p></div>
+                    <div className="detail-group"><label>Department</label><p>{detailUser.department || '-'}</p></div>
+                    <div className="detail-group"><label>Section</label><p>{detailUser.section || '-'}</p></div>
+                    <div className="detail-group"><label>Address</label><p>{detailUser.address || '-'}</p></div>
                     <div className="detail-group">
                       <label>Status</label>
-                      <p>
-                        {detailUser.is_banned
-                          ? 'Banned'
-                          : detailUser.is_active
-                            ? 'Active'
-                            : 'Inactive'}
-                      </p>
+                      <p>{detailUser.is_banned ? 'Banned' : detailUser.is_active ? 'Active' : 'Inactive'}</p>
                     </div>
                     <div className="detail-group">
                       <label>Member Since</label>
-                      <p>
-                        {detailUser.created_at
-                          ? new Date(detailUser.created_at).toLocaleDateString()
-                          : '-'}
-                      </p>
+                      <p>{detailUser.created_at ? new Date(detailUser.created_at).toLocaleDateString() : '-'}</p>
                     </div>
                   </>
                 )}
@@ -553,7 +496,6 @@ export default function AdminBorrowRequest() {
                 {confirmBorrow.return_notes && (
                   <p><strong>User Notes:</strong> {confirmBorrow.return_notes}</p>
                 )}
-
                 <form onSubmit={handleConfirmReturn}>
                   <div className="form-group">
                     <label htmlFor="admin-condition">Asset Condition</label>
@@ -570,7 +512,6 @@ export default function AdminBorrowRequest() {
                     </select>
                     <p className="form-hint">On-time return: +5 trust. Late return: -5 per day overdue. At -25 trust, score resets to 0 and counts as 1 warning (3 warnings = ban).</p>
                   </div>
-
                   <div className="form-group">
                     <label htmlFor="admin-notes">Admin Notes (optional)</label>
                     <textarea
@@ -580,7 +521,6 @@ export default function AdminBorrowRequest() {
                       placeholder="Inspection notes..."
                     />
                   </div>
-
                   <div className="modal-footer">
                     <button type="button" className="btn btn-secondary" onClick={() => setConfirmBorrow(null)}>
                       Cancel

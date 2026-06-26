@@ -126,6 +126,7 @@ async def register(user: UserRegister):
             "credit_score": 0.0,
             "wallet_address": None,
             "is_active": True,
+            "late_return_warnings": 0,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
         }

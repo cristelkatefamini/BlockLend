@@ -117,8 +117,6 @@ export const notificationAPI = {
 // Penalty endpoints
 export const penaltyAPI = {
   getPenalties: () => api.get('/penalties'),
-  calculatePenalty: (borrowId) => api.get(`/penalties/${borrowId}`),
-  payPenalty: (penaltyId) => api.post(`/penalties/${penaltyId}/pay`),
 };
 
 // Transaction endpoints

@@ -1,13 +1,19 @@
 .home-container {
-  padding: var(--spacing-2xl) 0;
-  min-height: 80vh;
+  padding: 2rem 0 3rem;
+  min-height: calc(100vh - 120px);
+}
+
+.home-container .container {
+  max-width: 1180px;
+  padding: 0 2.5rem;
 }
 
 .welcome-section {
   margin-bottom: var(--spacing-2xl);
-  padding: var(--spacing-xl);
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  background: var(--landing-navy);
+  border-radius: 0;
+  border: none;
   color: var(--white);
 }
 
@@ -30,18 +36,20 @@
 
 .stat-card {
   background-color: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
+  border: 1px solid #e8e8e8;
   display: flex;
   gap: var(--spacing-lg);
   align-items: center;
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .stat-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow: none;
+  transform: none;
+  border-color: var(--landing-heading-blue);
 }
 
 .stat-icon {
@@ -58,15 +66,16 @@
 .stat-number {
   font-size: 2rem;
   font-weight: var(--font-weight-bold);
-  color: var(--primary-blue);
+  color: var(--landing-navy);
   margin: 0;
 }
 
 .recent-section {
   background-color: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
+  border: 1px solid #e8e8e8;
   margin-bottom: var(--spacing-2xl);
 }
 
@@ -81,54 +90,67 @@
 
 .section-header h2 {
   margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--landing-navy);
 }
 
 .link-button {
-  color: var(--accent-blue);
+  color: var(--landing-heading-blue);
   font-weight: var(--font-weight-semibold);
   transition: color var(--transition-fast);
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .link-button:hover {
-  color: var(--primary-blue);
+  color: var(--landing-orange);
 }
 
-.borrow-table-wrapper {
+.home-container .borrow-table-wrapper {
   overflow-x: auto;
 }
 
-.borrow-table {
+.home-container .borrow-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.borrow-table thead th {
-  background-color: var(--light-blue);
-  color: var(--primary-blue);
-  font-weight: var(--font-weight-semibold);
-  padding: var(--spacing-md);
+.home-container .borrow-table thead th {
+  background-color: var(--landing-navy);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
   text-align: left;
-  border-bottom: 2px solid var(--accent-blue);
+  border-bottom: none;
+  font-size: 0.875rem;
 }
 
-.borrow-table tbody td {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--light-gray);
+.home-container .borrow-table tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.875rem;
+  color: #444444;
 }
 
-.borrow-table tbody tr:hover {
-  background-color: var(--light-blue);
+.home-container .borrow-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.home-container .borrow-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .action-link {
-  color: var(--accent-blue);
+  color: var(--landing-heading-blue);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   transition: color var(--transition-fast);
+  font-size: 0.875rem;
 }
 
 .action-link:hover {
-  color: var(--primary-blue);
+  color: var(--landing-orange);
 }
 
 .empty-state {
@@ -157,18 +179,18 @@
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
   background-color: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid #e8e8e8;
   text-decoration: none;
   color: var(--dark-gray);
-  transition: all var(--transition-base);
-  border: 2px solid transparent;
+  transition: border-color var(--transition-base);
 }
 
 .action-button:hover {
-  border-color: var(--accent-blue);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  border-color: var(--landing-orange);
+  box-shadow: none;
+  transform: none;
 }
 
 .action-icon {

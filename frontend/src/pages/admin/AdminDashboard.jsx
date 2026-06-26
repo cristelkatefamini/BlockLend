@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { exportDashboardPDF } from '../../utils/pdfReport';
 import '../../styles/pages/Admin.css';
 
 export default function AdminDashboard() {
@@ -72,13 +73,22 @@ export default function AdminDashboard() {
               <h1>Admin Dashboard</h1>
               <p>Welcome back, {user?.username}! Here's your system overview.</p>
             </div>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={handleRefresh}
-              disabled={loading}
-            >
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => exportDashboardPDF(stats)}
+                disabled={loading}
+              >
+                ⬇ Export PDF
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={handleRefresh}
+                disabled={loading}
+              >
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
           </div>
           {lastUpdated && (
             <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', marginTop: '0.5rem' }}>

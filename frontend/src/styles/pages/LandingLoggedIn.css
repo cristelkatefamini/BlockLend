@@ -1,0 +1,62 @@
+.logged-in-panel {
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-top: none;
+  padding: 1.85rem 1.75rem 1.5rem;
+  text-align: left;
+}
+
+.logged-in-greeting {
+  font-size: 1.05rem;
+  color: var(--landing-body-gray);
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+
+.logged-in-greeting strong {
+  color: var(--landing-navy);
+}
+
+.logged-in-sub {
+  font-size: 0.9rem;
+  color: #777777;
+  margin: 0 0 1.25rem;
+  line-height: 1.55;
+}
+
+.logged-in-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.logged-in-action {
+  display: block;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--landing-navy);
+  background: #f8f9fb;
+  border: 1px solid #d8d8d8;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.logged-in-action:hover {
+  background: rgba(74, 123, 167, 0.08);
+  border-color: var(--landing-heading-blue);
+  color: var(--landing-navy);
+}
+
+.logged-in-action--primary {
+  background: var(--landing-orange);
+  border-color: var(--landing-orange);
+  color: #ffffff;
+}
+
+.logged-in-action--primary:hover {
+  background: #d06818;
+  border-color: #d06818;
+  color: #ffffff;
+}

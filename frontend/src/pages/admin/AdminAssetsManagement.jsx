@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { exportAssetsPDF } from '../../utils/pdfReport';
 import '../../styles/pages/Admin.css';
 
 export default function AdminAssetsManagement() {
@@ -317,8 +318,19 @@ export default function AdminAssetsManagement() {
     <div className="admin-container">
       <div className="container">
         <div className="admin-header">
-          <h1>Assets Management</h1>
-          <p>Manage all items available for borrowing</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1>Assets Management</h1>
+              <p>Manage all items available for borrowing</p>
+            </div>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => exportAssetsPDF(assets)}
+              disabled={loading || assets.length === 0}
+            >
+              ⬇ Export PDF
+            </button>
+          </div>
         </div>
 
         {/* Search and Filter Section */}

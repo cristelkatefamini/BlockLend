@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Landing from './pages/Landing';
+import LandingLoggedIn from './pages/LandingLoggedIn';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import Home from './pages/Home';
@@ -20,14 +21,18 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBorrowRequest from './pages/admin/AdminBorrowRequest';
 import AdminAssetsManagement from './pages/admin/AdminAssetsManagement';
 import AdminUsersManagement from './pages/admin/AdminUsersManagement';
+import AdminBlockchain from './pages/admin/AdminBlockchain';
 
 // Styles
 import './styles/global.css';
 import './App.css';
 
+import { useAuth } from './context/AuthContext';
+
 function AppLayout() {
   const location = useLocation();
-  const isPublicMarketingPage = ['/', '/register', '/verify-email'].includes(location.pathname);
+  const { isAuthenticated } = useAuth();
+  const isPublicMarketingPage = ['/', '/register', '/verify-email'].includes(location.pathname) && !isAuthenticated;
 
   return (
     <div className="app">
@@ -36,7 +41,7 @@ function AppLayout() {
       <main className="main-content">
         <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={isAuthenticated ? <LandingLoggedIn /> : <Landing />} />
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/about" element={<About />} />
@@ -120,6 +125,15 @@ function AppLayout() {
                 element={
                   <ProtectedRoute>
                     <AdminUsersManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/blockchain"
+                element={
+                  <ProtectedRoute>
+                    <AdminBlockchain />
                   </ProtectedRoute>
                 }
               />

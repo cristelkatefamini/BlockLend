@@ -106,7 +106,12 @@ export default function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="logo">
-          <span className="logo-icon">⛓️</span>
+          <svg className="logo-icon" viewBox="0 0 32 36" aria-hidden="true">
+            <path
+              d="M16 1L2 8v12c0 9.5 6.2 18.3 14 21 7.8-2.7 14-11.5 14-21V8L16 1z"
+              fill="currentColor"
+            />
+          </svg>
           <span className="logo-text">BlockLend</span>
         </Link>
 
@@ -115,7 +120,7 @@ export default function Header() {
             <>
               <Link to="/home" className="nav-link">Home</Link>
               <Link to="/assets" className="nav-link">Assets</Link>
-              <Link to="/transactions" className="nav-link">Transactions</Link>
+              <Link to="/transactions" className="nav-link">Activity</Link>
               {user?.role !== 'admin' && (
                 <Link to="/borrow-history" className="nav-link">Borrow History</Link>
               )}
@@ -127,6 +132,7 @@ export default function Header() {
                     <Link to="/admin/borrow-requests" className="dropdown-link">Borrow Requests</Link>
                     <Link to="/admin/assets" className="dropdown-link">Assets Management</Link>
                     <Link to="/admin/users" className="dropdown-link">Users Management</Link>
+                    <Link to="/admin/blockchain" className="dropdown-link">Blockchain</Link>
                   </div>
                 </div>
               )}

@@ -11,7 +11,8 @@ export default function Asset() {
   const [error, setError] = useState('');
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [showBorrowModal, setShowBorrowModal] = useState(false);
-  const [borrowDays, setBorrowDays] = useState(7);
+  const [borrowDays, setBorrowDays] = useState('7');
+  const [borrowQuantityInput, setBorrowQuantityInput] = useState('1');
   const [borrowReason, setBorrowReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,18 +64,37 @@ export default function Asset() {
     e.preventDefault();
     if (!selectedAsset) return;
 
+    const formData = new FormData(e.target);
+    const borrowQty = parseInt(formData.get('quantity') || borrowQuantityInput, 10);
+    const durationDays = parseInt(formData.get('duration_days') || borrowDays, 10);
+
+    if (Number.isNaN(borrowQty) || borrowQty < 1) {
+      alert('Please enter a valid quantity (at least 1).');
+      return;
+    }
+    if (borrowQty > selectedAsset.quantity) {
+      alert(`Only ${selectedAsset.quantity} item(s) available.`);
+      return;
+    }
+    if (Number.isNaN(durationDays) || durationDays < 1) {
+      alert('Please enter a valid duration (at least 1 day).');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await borrowAPI.createBorrowRequest({
         asset_id: selectedAsset._id,
-        duration_days: borrowDays,
+        duration_days: durationDays,
+        quantity: borrowQty,
         reason: borrowReason,
       });
       alert('Borrow request submitted successfully!');
       setShowBorrowModal(false);
       setSelectedAsset(null);
       setBorrowReason('');
-      setBorrowDays(7);
+      setBorrowDays('7');
+      setBorrowQuantityInput('1');
       await fetchAssets();
     } catch (err) {
       alert(err.response?.data?.detail || err.response?.data?.message || 'Failed to submit borrow request');
@@ -155,6 +175,8 @@ export default function Asset() {
                       className="btn btn-primary"
                       onClick={() => {
                         setSelectedAsset(asset);
+                        setBorrowQuantityInput('1');
+                        setBorrowDays('7');
                         setShowBorrowModal(true);
                       }}
                       disabled={!asset.in_stock || asset.quantity === 0}
@@ -189,14 +211,55 @@ export default function Asset() {
 
                 <form onSubmit={handleBorrowSubmit}>
                   <div className="form-group">
+                    <label htmlFor="borrowQuantity">Quantity</label>
+                    <input
+                      id="borrowQuantity"
+                      name="quantity"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={borrowQuantityInput}
+                      onChange={(e) => {
+                        const next = e.target.value.replace(/\D/g, '');
+                        setBorrowQuantityInput(next);
+                      }}
+                      onBlur={() => {
+                        if (!borrowQuantityInput) {
+                          setBorrowQuantityInput('1');
+                          return;
+                        }
+                        let val = parseInt(borrowQuantityInput, 10);
+                        if (Number.isNaN(val) || val < 1) val = 1;
+                        if (val > selectedAsset.quantity) val = selectedAsset.quantity;
+                        setBorrowQuantityInput(String(val));
+                      }}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label htmlFor="borrowDays">Duration (days)</label>
                     <input
                       id="borrowDays"
-                      type="number"
-                      min="1"
-                      max="30"
+                      name="duration_days"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={borrowDays}
-                      onChange={(e) => setBorrowDays(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const next = e.target.value.replace(/\D/g, '');
+                        setBorrowDays(next);
+                      }}
+                      onBlur={() => {
+                        if (!borrowDays) {
+                          setBorrowDays('1');
+                          return;
+                        }
+                        let val = parseInt(borrowDays, 10);
+                        if (Number.isNaN(val) || val < 1) val = 1;
+                        if (val > 30) val = 30;
+                        setBorrowDays(String(val));
+                      }}
                       required
                     />
                   </div>

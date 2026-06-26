@@ -227,6 +227,53 @@ def _restore_asset_quantity(asset_id: str) -> None:
     )
 
 
+def _get_borrow_quantity(borrow: dict) -> int:
+    try:
+        qty = int(borrow.get("quantity", 1) or 1)
+    except (TypeError, ValueError):
+        qty = 1
+    return max(1, qty)
+
+
+def _adjust_asset_quantity(asset_id: str, delta: int) -> int:
+    """Atomically adjust asset quantity. Returns the new quantity."""
+    if not ObjectId.is_valid(asset_id):
+        raise HTTPException(status_code=400, detail="Invalid asset ID")
+
+    assets_collection = database.get_collection("assets")
+    now = datetime.utcnow()
+
+    if delta < 0:
+        required = abs(delta)
+        filter_query = {"_id": ObjectId(asset_id), "quantity": {"$gte": required}}
+    else:
+        filter_query = {"_id": ObjectId(asset_id)}
+
+    result = assets_collection.find_one_and_update(
+        filter_query,
+        {
+            "$inc": {"quantity": delta},
+            "$set": {"updated_at": now},
+        },
+        return_document=True,
+    )
+
+    if not result:
+        if delta < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Insufficient quantity available for this borrow",
+            )
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    new_qty = int(result.get("quantity", 0) or 0)
+    assets_collection.update_one(
+        {"_id": ObjectId(asset_id)},
+        {"$set": {"in_stock": new_qty > 0}},
+    )
+    return new_qty
+
+
 @router.get("")
 async def get_borrows(
     current_user: dict = Depends(get_current_user)
@@ -283,6 +330,11 @@ async def create_borrow(
         if duration_days is None:
             duration_days = payload.get("duration")
         reason = payload.get("reason") or payload.get("notes")
+        borrow_qty_raw = (
+            payload.get("quantity")
+            if payload.get("quantity") is not None
+            else payload.get("borrow_quantity", payload.get("qty", 1))
+        )
 
         if not asset_id:
             raise HTTPException(status_code=400, detail="Asset ID is required")
@@ -292,6 +344,13 @@ async def create_borrow(
             raise HTTPException(status_code=400, detail="Duration must be a valid number")
         if duration_days < 1:
             raise HTTPException(status_code=400, detail="Duration must be at least 1 day")
+
+        try:
+            borrow_qty = int(borrow_qty_raw)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Quantity must be a valid number")
+        if borrow_qty < 1:
+            raise HTTPException(status_code=400, detail="Quantity must be at least 1")
 
         if not ObjectId.is_valid(asset_id):
             raise HTTPException(status_code=400, detail="Invalid asset ID")
@@ -304,6 +363,20 @@ async def create_borrow(
         if not is_asset_available(asset):
             raise HTTPException(status_code=400, detail="Asset is not available")
 
+        try:
+            available_qty = int(asset.get("quantity", 0) or 0)
+        except (TypeError, ValueError):
+            available_qty = 0
+
+        if borrow_qty > available_qty:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Only {available_qty} item(s) available. You requested {borrow_qty}.",
+            )
+
+        # Reserve inventory immediately when the borrow request is created
+        _adjust_asset_quantity(asset_id, -borrow_qty)
+
         now = datetime.utcnow()
         borrow_doc = {
             "borrower_id": current_user.get("user_id"),
@@ -311,17 +384,23 @@ async def create_borrow(
             "assetName": asset.get("name", "Unknown Asset"),
             "reason": reason or "",
             "duration_days": duration_days,
+            "quantity": borrow_qty,
             "status": "pending",
             "borrowDate": now,
             "requestDate": now,
             "returnDate": None,
             "trustPoints": 0,
+            "quantity_adjusted": True,
             "created_at": now,
             "updated_at": now,
         }
 
         borrows_collection = database.get_collection("borrows")
-        result = borrows_collection.insert_one(borrow_doc)
+        try:
+            result = borrows_collection.insert_one(borrow_doc)
+        except Exception:
+            _adjust_asset_quantity(asset_id, borrow_qty)
+            raise
         borrow_doc["_id"] = result.inserted_id
         borrow_id = str(result.inserted_id)
 
@@ -336,7 +415,8 @@ async def create_borrow(
         return {
             "success": True,
             "message": "Borrow request created successfully",
-            "data": serialize_borrow(borrow_doc)
+            "data": serialize_borrow(borrow_doc),
+            "asset_quantity_remaining": available_qty - borrow_qty,
         }
     except HTTPException:
         raise
@@ -364,20 +444,30 @@ async def approve_borrow(
         if borrow.get("status") != "pending":
             raise HTTPException(status_code=400, detail="Only pending requests can be approved")
 
-        _reserve_asset_quantity(str(borrow.get("asset_id")))
+        asset_id = str(borrow.get("asset_id"))
+        borrow_qty = _get_borrow_quantity(borrow)
+        qty_adjusted_on_approve = False
+
+        # Legacy borrows created before inventory reservation: decrement on approve
+        if not borrow.get("quantity_adjusted"):
+            _reserve_asset_quantity(asset_id)
+            qty_adjusted_on_approve = True
 
         tx_hash = _submit_borrow_blockchain_event(
             borrow_id,
             "borrow_approve",
             current_user,
-            asset_id=str(borrow.get("asset_id")),
+            asset_id=asset_id,
         )
 
         now = datetime.utcnow()
-        duration_days = borrow.get("duration_days") or 1
+        duration_days = borrow.get("duration_days") or 7
+        due_date = now + timedelta(days=duration_days)
+
         update_fields = {
             "status": "active",
-            "due_date": now + timedelta(days=duration_days),
+            "due_date": due_date,
+            "quantity_adjusted": True,
             "updated_at": now,
         }
         if tx_hash:
@@ -390,18 +480,19 @@ async def approve_borrow(
             return_document=True,
         )
         if not result:
-            raise HTTPException(status_code=404, detail="Borrow record not found")
+            if qty_adjusted_on_approve:
+                _adjust_asset_quantity(asset_id, borrow_qty)
+            raise HTTPException(status_code=404, detail="Borrow record not found or already processed")
 
         record_borrow_approved(str(borrow.get("borrower_id")))
 
         asset_name = borrow.get("assetName") or "asset"
-        due_date = update_fields.get("due_date")
         create_notification(
             str(borrow.get("borrower_id")),
             "borrow_approved",
             "Borrow Request Approved",
-            f"Your request to borrow '{asset_name}' was approved. Due date: {due_date.strftime('%Y-%m-%d') if due_date else 'N/A'}.",
-            {"borrow_id": borrow_id, "asset_name": asset_name, "due_date": due_date.isoformat() if due_date else None},
+            f"Your request to borrow '{asset_name}' was approved. Due date: {due_date.strftime('%Y-%m-%d')}.",
+            {"borrow_id": borrow_id, "asset_name": asset_name, "due_date": due_date.isoformat()},
         )
 
         message = "Borrow request approved"
@@ -433,8 +524,19 @@ async def decline_borrow(
             raise HTTPException(status_code=400, detail="Invalid borrow ID")
 
         borrows_collection = database.get_collection("borrows")
+        borrow = borrows_collection.find_one({"_id": ObjectId(borrow_id)})
+        if not borrow:
+            raise HTTPException(status_code=404, detail="Borrow record not found")
+
+        previous_status = borrow.get("status")
+        if previous_status not in ("pending", "approved", "active"):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot decline a borrow with status '{previous_status}'",
+            )
+
         result = borrows_collection.find_one_and_update(
-            {"_id": ObjectId(borrow_id)},
+            {"_id": ObjectId(borrow_id), "status": previous_status},
             {"$set": {"status": "declined", "updated_at": datetime.utcnow()}},
             return_document=True,
         )
@@ -449,6 +551,10 @@ async def decline_borrow(
             f"Your request to borrow '{asset_name}' was declined by an admin.",
             {"borrow_id": borrow_id, "asset_name": asset_name},
         )
+
+        # Restore inventory if stock was previously reserved
+        if result.get("quantity_adjusted") and previous_status in ("pending", "approved", "active"):
+            _adjust_asset_quantity(str(result.get("asset_id")), _get_borrow_quantity(result))
 
         return {
             "success": True,
@@ -549,14 +655,17 @@ async def confirm_return(
         if borrow.get("status") != "return_pending":
             raise HTTPException(status_code=400, detail="Only pending returns can be confirmed")
 
+        borrow_qty = _get_borrow_quantity(borrow)
+        asset_id = str(borrow.get("asset_id"))
+
         tx_hash = _submit_borrow_blockchain_event(
             borrow_id,
             "borrow_return",
             current_user,
-            asset_id=str(borrow.get("asset_id")),
+            asset_id=asset_id,
         )
 
-        _restore_asset_quantity(str(borrow.get("asset_id")))
+        _restore_asset_quantity(asset_id)
 
         now = datetime.utcnow()
         return_submitted_at = borrow.get("return_submitted_at") or now
@@ -637,4 +746,3 @@ async def confirm_return(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

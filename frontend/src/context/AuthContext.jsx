@@ -19,6 +19,16 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const onForceLogout = () => {
+      setUser(null);
+      setToken(null);
+      setIsAdmin(false);
+    };
+    window.addEventListener('auth:force-logout', onForceLogout);
+    return () => window.removeEventListener('auth:force-logout', onForceLogout);
+  }, []);
+
   const login = (userData, authToken) => {
     setUser(userData);
     setToken(authToken);

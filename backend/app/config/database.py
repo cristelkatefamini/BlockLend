@@ -70,6 +70,16 @@ class Database:
             penalties = self.get_collection('penalties')
             penalties.create_index('user_id')
             penalties.create_index('borrow_id')
+
+            # Points collection (trust score & borrow stats per user)
+            points = self.get_collection('points')
+            points.create_index('user_id', unique=True)
+
+            # Notifications collection
+            notifications = self.get_collection('notifications')
+            notifications.create_index('user_id')
+            notifications.create_index([('user_id', 1), ('read', 1)])
+            notifications.create_index('created_at')
             
             print("✓ Database indexes created")
         except Exception as e:

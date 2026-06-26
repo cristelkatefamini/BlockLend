@@ -21,8 +21,11 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         # Count total assets
         total_assets = assets_collection.count_documents({})
         
-        # Count available assets
-        available_assets = assets_collection.count_documents({"availability": True})
+        # Count available assets (in stock with quantity > 0)
+        available_assets = assets_collection.count_documents({
+            "in_stock": True,
+            "quantity": {"$gt": 0},
+        })
         
         # Count total borrow requests
         total_borrows = borrows_collection.count_documents({})

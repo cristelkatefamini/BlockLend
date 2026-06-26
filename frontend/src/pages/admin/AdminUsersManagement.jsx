@@ -10,6 +10,8 @@ export default function AdminUsersManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [resettingId, setResettingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     if (user?.role !== 'admin') {
@@ -44,12 +46,50 @@ export default function AdminUsersManagement() {
     }
   };
 
+  const handleResetWarnings = async (userId, username) => {
+    if (!window.confirm(`Reset warnings for "${username}"? This will set their warning count back to 0.`)) {
+      return;
+    }
+
+    try {
+      setResettingId(userId);
+      setError('');
+      await userAPI.resetUserWarnings(userId);
+      await loadUsers();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Failed to reset warnings');
+    } finally {
+      setResettingId(null);
+    }
+  };
+
+  const handleDeleteUser = async (targetUser) => {
+    const label = targetUser.username || targetUser.email || 'this user';
+    const confirmed = window.confirm(
+      `Permanently delete "${label}"?\n\nThis will remove their account, borrow history, trust points, notifications, and all related data. This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(targetUser.id);
+      setError('');
+      await userAPI.deleteUser(targetUser.id);
+      await loadUsers();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Failed to delete user');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="admin-container">
       <div className="container">
         <div className="admin-header">
           <h1>User Management</h1>
-          <p>Activate or deactivate user accounts</p>
+          <p>Activate, deactivate, or permanently delete user accounts</p>
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -67,6 +107,7 @@ export default function AdminUsersManagement() {
                   <th>Username</th>
                   <th>Email</th>
                   <th>Role</th>
+                  <th>Warnings</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -77,14 +118,40 @@ export default function AdminUsersManagement() {
                     <td>{u.username}</td>
                     <td>{u.email}</td>
                     <td>{u.role}</td>
-                    <td>{u.is_active ? 'Active' : 'Inactive'}</td>
+                    <td>{u.warning_count ?? 0} / {u.max_warnings ?? 3}</td>
                     <td>
-                      <button
-                        className={u.is_active ? 'btn btn-secondary' : 'btn btn-success'}
-                        onClick={() => handleToggleStatus(u.id)}
-                      >
-                        {u.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
+                      {u.is_banned ? 'Banned' : u.is_active ? 'Active' : 'Inactive'}
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        {(u.warning_count ?? 0) > 0 && u.role !== 'admin' && (
+                          <button
+                            type="button"
+                            className="btn btn-edit btn-sm"
+                            disabled={resettingId === u.id}
+                            onClick={() => handleResetWarnings(u.id, u.username)}
+                          >
+                            {resettingId === u.id ? 'Resetting...' : 'Reset Warnings'}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={u.is_active ? 'btn btn-secondary btn-sm' : 'btn btn-success btn-sm'}
+                          onClick={() => handleToggleStatus(u.id)}
+                        >
+                          {u.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        {u.role !== 'admin' && u.id !== user?.id && (
+                          <button
+                            type="button"
+                            className="btn-delete btn-sm"
+                            disabled={deletingId === u.id}
+                            onClick={() => handleDeleteUser(u)}
+                          >
+                            {deletingId === u.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

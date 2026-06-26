@@ -5,6 +5,7 @@ from typing import Optional
 from config.database import database
 from middleware.auth import get_current_user
 from config.cloudinary import init_cloudinary
+from utils.asset_utils import normalize_asset_availability
 import cloudinary.uploader
 
 router = APIRouter(prefix="/api/assets", tags=["assets"])
@@ -29,15 +30,10 @@ async def get_assets(
         assets_collection = database.get_collection("assets")
         assets = list(assets_collection.find(query))
         
-        # Convert ObjectId to string for JSON serialization and add default fields
+        # Convert ObjectId to string for JSON serialization and normalize availability
         for asset in assets:
             asset["_id"] = str(asset["_id"])
-            try:
-                quantity = int(asset.get("quantity", 1) or 1)
-            except (TypeError, ValueError):
-                quantity = 1
-            asset["quantity"] = quantity
-            asset["in_stock"] = quantity > 0
+            normalize_asset_availability(asset)
         
         return {
             "success": True,
@@ -65,12 +61,7 @@ async def get_asset(
             raise HTTPException(status_code=404, detail="Asset not found")
         
         asset["_id"] = str(asset["_id"])
-        try:
-            quantity = int(asset.get("quantity", 1) or 1)
-        except (TypeError, ValueError):
-            quantity = 1
-        asset["quantity"] = quantity
-        asset["in_stock"] = quantity > 0
+        normalize_asset_availability(asset)
         
         return {
             "success": True,
@@ -221,6 +212,7 @@ async def update_asset(
             raise HTTPException(status_code=404, detail="Asset not found")
         
         result["_id"] = str(result["_id"])
+        normalize_asset_availability(result)
         return {
             "success": True,
             "message": "Asset updated successfully",

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { assetAPI, borrowAPI } from '../utils/api';
 import '../styles/pages/Asset.css';
 
 export default function Asset() {
+  const { isAdmin } = useAuth();
   const [assets, setAssets] = useState([]);
   const [filteredAssets, setFilteredAssets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ export default function Asset() {
       <div className="container">
         <div className="page-header">
           <h1>Available Assets</h1>
-          <p>Browse and request to borrow available assets</p>
+          <p>{isAdmin ? 'Browse all available assets' : 'Browse and request to borrow available assets'}</p>
         </div>
 
         {error && <div className="alert alert-danger">{error}</div>}
@@ -148,16 +150,18 @@ export default function Asset() {
                     </span>
                   </div>
 
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => {
-                      setSelectedAsset(asset);
-                      setShowBorrowModal(true);
-                    }}
-                    disabled={!asset.in_stock || asset.quantity === 0}
-                  >
-                    Request to Borrow
-                  </button>
+                  {!isAdmin && (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setSelectedAsset(asset);
+                        setShowBorrowModal(true);
+                      }}
+                      disabled={!asset.in_stock || asset.quantity === 0}
+                    >
+                      Request to Borrow
+                    </button>
+                  )}
                 </div>
               </div>
             ))

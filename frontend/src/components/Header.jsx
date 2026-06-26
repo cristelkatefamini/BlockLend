@@ -1,9 +1,106 @@
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { notificationAPI } from '../utils/api';
+import { formatRelativeTime } from '../utils/time';
 import '../styles/Header.css';
+
+const NOTIFICATION_LABELS = {
+  account_update: 'Account',
+  borrow_request: 'Borrow',
+  borrow_approved: 'Borrow',
+  borrow_declined: 'Borrow',
+  return_submitted: 'Borrow',
+  return_confirmed: 'Borrow',
+  borrow_history: 'History',
+  due_tomorrow: 'Reminder',
+  warning: 'Warning',
+  account_ban: 'Banned',
+};
 
 export default function Header() {
   const { user, logout, isAuthenticated } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const notificationRef = useRef(null);
+  const [, timeTick] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const interval = setInterval(() => timeTick((t) => t + 1), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await notificationAPI.getUnreadCount();
+      setUnreadCount(response.data?.unread_count || 0);
+    } catch {
+      // silently ignore
+    }
+  };
+
+  const fetchNotifications = async () => {
+    setLoadingNotifications(true);
+    try {
+      const response = await notificationAPI.getNotifications();
+      setNotifications(response.data?.notifications || []);
+      setUnreadCount(response.data?.unread_count || 0);
+    } catch {
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    const next = !showNotifications;
+    setShowNotifications(next);
+    if (next) {
+      await fetchNotifications();
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationAPI.markAsRead(id);
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, read: true } : n))
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <header className="header">
@@ -47,6 +144,60 @@ export default function Header() {
         <div className="user-section">
           {isAuthenticated ? (
             <>
+              {user?.role !== 'admin' && (
+                <div className="notification-menu" ref={notificationRef}>
+                  <button
+                    type="button"
+                    className="notification-bell"
+                    onClick={toggleNotifications}
+                    aria-label="Notifications"
+                  >
+                    🔔
+                    {unreadCount > 0 && (
+                      <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    )}
+                  </button>
+                  {showNotifications && (
+                    <div className="notification-dropdown">
+                      <div className="notification-dropdown-header">
+                        <span>Notifications</span>
+                        {unreadCount > 0 && (
+                          <button type="button" className="mark-all-read" onClick={handleMarkAllRead}>
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="notification-list">
+                        {loadingNotifications ? (
+                          <div className="notification-empty">Loading...</div>
+                        ) : notifications.length === 0 ? (
+                          <div className="notification-empty">No activity yet</div>
+                        ) : (
+                          notifications.map((n) => (
+                            <button
+                              key={n.id}
+                              type="button"
+                              className={`notification-item ${n.read ? '' : 'notification-item--unread'}`}
+                              onClick={() => !n.read && handleMarkAsRead(n.id)}
+                            >
+                              <div className="notification-item-header">
+                                <span className="notification-item-type">
+                                  {NOTIFICATION_LABELS[n.type] || 'Update'}
+                                </span>
+                                <span className="notification-item-time">
+                                  {formatRelativeTime(n.created_at)}
+                                </span>
+                              </div>
+                              <div className="notification-item-title">{n.title}</div>
+                              <div className="notification-item-message">{n.message}</div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <span className="user-greeting">Welcome, {user?.username}</span>
               <button className="btn btn-secondary btn-sm" onClick={logout}>
                 Logout

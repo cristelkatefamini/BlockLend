@@ -10,10 +10,7 @@ export default function BorrowHistory() {
   const [showModal, setShowModal] = useState(false);
   const [borrowTransactions, setBorrowTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
-  const [returnData, setReturnData] = useState({
-    condition: 'good',
-    notes: '',
-  });
+  const [returnData, setReturnData] = useState({ notes: '' });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -63,10 +60,10 @@ export default function BorrowHistory() {
     setSubmitting(true);
     try {
       await borrowAPI.returnAsset(selectedBorrow._id, returnData);
-      alert('Asset return submitted successfully!');
+      alert('Return submitted! An admin will inspect the asset and confirm your return.');
       setShowModal(false);
       setSelectedBorrow(null);
-      setReturnData({ condition: 'good', notes: '' });
+      setReturnData({ notes: '' });
       await fetchBorrowHistory();
     } catch (err) {
       alert(err.response?.data?.detail || err.response?.data?.message || 'Failed to submit return');
@@ -147,6 +144,9 @@ export default function BorrowHistory() {
                           Return
                         </button>
                       )}
+                      {borrow.status === 'return_pending' && (
+                        <span className="return-pending-label">Awaiting admin</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -194,6 +194,28 @@ export default function BorrowHistory() {
                   </p>
                 </div>
 
+                {selectedBorrow.status === 'completed' && (
+                  <>
+                    <div className="detail-group">
+                      <label>Item Condition</label>
+                      <p>
+                        {selectedBorrow.condition ? (
+                          <span className={`badge badge-${getConditionBadgeColor(selectedBorrow.condition)}`}>
+                            {formatCondition(selectedBorrow.condition)}
+                          </span>
+                        ) : (
+                          'Not recorded'
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="detail-group">
+                      <label>Admin Notes</label>
+                      <p>{selectedBorrow.admin_return_notes || 'No notes provided'}</p>
+                    </div>
+                  </>
+                )}
+
                 <div className="detail-group">
                   <label>Blockchain Transactions</label>
                   {loadingTransactions ? (
@@ -214,27 +236,17 @@ export default function BorrowHistory() {
 
                 {(selectedBorrow.status === 'active' || selectedBorrow.status === 'approved') && (
                   <form onSubmit={handleReturnSubmit}>
-                    <div className="form-group">
-                      <label htmlFor="condition">Asset Condition</label>
-                      <select
-                        id="condition"
-                        value={returnData.condition}
-                        onChange={(e) => setReturnData(prev => ({ ...prev, condition: e.target.value }))}
-                      >
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                        <option value="damaged">Damaged</option>
-                      </select>
-                    </div>
+                    <p className="return-info">
+                      Submit this asset for return. An admin will inspect it and confirm the condition.
+                    </p>
 
                     <div className="form-group">
-                      <label htmlFor="notes">Notes</label>
+                      <label htmlFor="notes">Notes (optional)</label>
                       <textarea
                         id="notes"
                         value={returnData.notes}
                         onChange={(e) => setReturnData(prev => ({ ...prev, notes: e.target.value }))}
-                        placeholder="Add any notes about the asset condition..."
+                        placeholder="Any notes about the return..."
                       />
                     </div>
 
@@ -251,10 +263,14 @@ export default function BorrowHistory() {
                         className="btn btn-success"
                         disabled={submitting}
                       >
-                        {submitting ? 'Processing...' : 'Confirm Return'}
+                        {submitting ? 'Processing...' : 'Submit Return'}
                       </button>
                     </div>
                   </form>
+                )}
+
+                {selectedBorrow.status === 'return_pending' && (
+                  <p className="return-info">Your return is pending admin confirmation.</p>
                 )}
               </div>
             </div>
@@ -270,8 +286,24 @@ function getBadgeColor(status) {
     case 'pending': return 'warning';
     case 'approved': return 'success';
     case 'active': return 'info';
+    case 'return_pending': return 'warning';
     case 'completed': return 'success';
     case 'rejected': return 'danger';
+    default: return 'info';
+  }
+}
+
+function formatCondition(condition) {
+  if (!condition) return 'Unknown';
+  return condition.charAt(0).toUpperCase() + condition.slice(1);
+}
+
+function getConditionBadgeColor(condition) {
+  switch ((condition || '').toLowerCase()) {
+    case 'good': return 'success';
+    case 'fair': return 'info';
+    case 'poor': return 'warning';
+    case 'damaged': return 'danger';
     default: return 'info';
   }
 }

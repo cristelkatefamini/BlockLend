@@ -10,7 +10,7 @@ sys.path.insert(0, str(app_dir))
 # Load environment variables
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(Path(__file__).parent / '.env')
 except ImportError:
     print("Warning: python-dotenv not installed. Environment variables from .env file will not be loaded.")
 

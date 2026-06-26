@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Pages
 import Landing from './pages/Landing';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import Home from './pages/Home';
 import Asset from './pages/Asset';
 import BorrowHistory from './pages/BorrowHistory';
@@ -26,7 +27,7 @@ import './App.css';
 
 function AppLayout() {
   const location = useLocation();
-  const isPublicMarketingPage = ['/', '/register'].includes(location.pathname);
+  const isPublicMarketingPage = ['/', '/register', '/verify-email'].includes(location.pathname);
 
   return (
     <div className="app">
@@ -37,6 +38,7 @@ function AppLayout() {
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/about" element={<About />} />
 
               {/* Protected Routes */}

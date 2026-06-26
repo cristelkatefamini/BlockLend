@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -16,10 +16,21 @@ export default function Landing() {
   const { login } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  useEffect(() => {
+    const banMessage = sessionStorage.getItem('banMessage');
+    if (banMessage) {
+      setError(banMessage);
+      sessionStorage.removeItem('banMessage');
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,9 +48,31 @@ export default function Landing() {
       login(response.data.user, response.data.token);
       navigate('/home');
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Login failed. Please try again.'));
+      const message = getApiErrorMessage(err, 'Login failed. Please try again.');
+      setError(message);
+
+      if (err.response?.status === 403 && message.toLowerCase().includes('verify your email')) {
+        setPendingVerificationEmail(formData.email);
+      } else {
+        setPendingVerificationEmail('');
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!pendingVerificationEmail) return;
+
+    setResendLoading(true);
+    setResendMessage('');
+    try {
+      const response = await authAPI.resendVerification(pendingVerificationEmail);
+      setResendMessage(response.data.message || 'Verification email sent.');
+    } catch (err) {
+      setResendMessage(getApiErrorMessage(err, 'Could not resend verification email.'));
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -130,7 +163,24 @@ export default function Landing() {
             </div>
 
             <form className="landing-form" onSubmit={handleSignIn}>
-              {error && <div className="alert alert-danger">{error}</div>}
+              {error && (
+                <div className={`alert ${error.toLowerCase().includes('banned') ? 'alert-ban' : 'alert-danger'}`}>
+                  {error}
+                </div>
+              )}
+              {resendMessage && <div className="alert alert-success">{resendMessage}</div>}
+
+              {pendingVerificationEmail && (
+                <button
+                  type="button"
+                  className="landing-form-submit"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  style={{ marginBottom: '0.75rem' }}
+                >
+                  {resendLoading ? 'Sending...' : 'Resend Verification Email'}
+                </button>
+              )}
 
               <div className="form-group">
                 <label htmlFor="signInEmail">Email *</label>

@@ -51,6 +51,24 @@ class BlockchainService:
             return tx_hash.hex()
         except Exception as e:
             raise Exception(f"Transaction failed: {str(e)}")
+
+    def send_transaction_and_wait(self, from_address, to_address, amount, private_key, timeout=30):
+        """Send a transaction and wait for Ganache/local chain to mine the receipt."""
+        tx_hash = self.send_transaction(from_address, to_address, amount, private_key)
+        w3 = self.get_web3_instance()
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
+        receipt_status = receipt.get("status")
+        status = "success" if receipt_status in (1, True, "1", "0x1") else "failed"
+        return {
+            "tx_hash": tx_hash,
+            "status": status,
+            "receipt": {
+                "block_number": receipt.get("blockNumber"),
+                "gas_used": receipt.get("gasUsed"),
+                "contract_address": receipt.get("contractAddress"),
+                "transaction_index": receipt.get("transactionIndex"),
+            },
+        }
     
     def get_transaction_receipt(self, tx_hash):
         """Get transaction receipt"""

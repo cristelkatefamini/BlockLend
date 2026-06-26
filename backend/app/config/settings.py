@@ -29,6 +29,16 @@ class Settings:
     ASSET_UPLOAD_FOLDER: str = os.path.join(UPLOAD_FOLDER, 'assets')
     DAMAGE_REPORT_FOLDER: str = os.path.join(UPLOAD_FOLDER, 'damage_reports')
     
+    # Email (Gmail SMTP)
+    SMTP_HOST: str = os.getenv('SMTP_HOST', 'smtp.gmail.com')
+    SMTP_PORT: int = int(os.getenv('SMTP_PORT', '587'))
+    SMTP_USER: str = os.getenv('SMTP_USER', '').strip()
+    # App passwords are shown with spaces; strip them for SMTP login
+    SMTP_PASSWORD: str = os.getenv('SMTP_PASSWORD', '').replace(' ', '').strip()
+    EMAIL_FROM: str = os.getenv('EMAIL_FROM', '')
+    FRONTEND_URL: str = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    EMAIL_VERIFICATION_EXPIRE_HOURS: int = int(os.getenv('EMAIL_VERIFICATION_EXPIRE_HOURS', '24'))
+
     # App
     DEBUG: bool = os.getenv('DEBUG', 'True').lower() == 'true'
     API_PREFIX: str = '/api'

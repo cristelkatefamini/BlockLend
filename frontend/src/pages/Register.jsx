@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 import { authAPI } from '../utils/api';
 import { getApiErrorMessage, validatePassword, validateUsername } from '../utils/validation';
 import PublicHeader from '../components/PublicHeader';
@@ -9,10 +8,11 @@ import TermsModal from '../components/TermsModal';
 import '../styles/pages/Landing.css';
 
 export default function Register() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
   const [showTerms, setShowTerms] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: location.state?.firstName || '',
     lastName: location.state?.lastName || '',
@@ -71,16 +71,67 @@ export default function Register() {
         role: 'user',
       });
 
-      if (response.data.user && response.data.token) {
-        login(response.data.user, response.data.token);
-        navigate('/home');
-      }
+      setRegisteredEmail(formData.email);
+      setResendMessage(response.data.message || 'Check your email to verify your account before signing in.');
     } catch (err) {
       setError(getApiErrorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+
+    setResendLoading(true);
+    setError('');
+    try {
+      const response = await authAPI.resendVerification(registeredEmail);
+      setResendMessage(response.data.message || 'Verification email sent.');
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not resend verification email.'));
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  if (registeredEmail) {
+    return (
+      <div className="landing">
+        <PublicHeader />
+
+        <section className="landing-main">
+          <div className="landing-main-inner" style={{ justifyContent: 'center' }}>
+            <div className="landing-form-wrapper" style={{ maxWidth: '520px' }}>
+              <div className="landing-form-header">
+                <span>Check your email</span>
+              </div>
+
+              <div className="landing-form">
+                {error && <div className="alert alert-danger">{error}</div>}
+                <div className="alert alert-success">{resendMessage}</div>
+                <p>
+                  We sent a verification link to <strong>{registeredEmail}</strong>.
+                  Open that email and click the link to activate your account, then sign in.
+                </p>
+                <button
+                  type="button"
+                  className="landing-form-submit"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                >
+                  {resendLoading ? 'Sending...' : 'Resend Verification Email'}
+                </button>
+                <p className="landing-form-footer">
+                  Already verified? <Link to="/">Sign in</Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="landing">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { notificationAPI } from '../utils/api';
 import { formatRelativeTime } from '../utils/time';
@@ -20,12 +20,15 @@ const NOTIFICATION_LABELS = {
 
 export default function Header() {
   const { user, logout, isAuthenticated } = useAuth();
+  const location = useLocation();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const notificationRef = useRef(null);
   const [, timeTick] = useState(0);
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -102,10 +105,13 @@ export default function Header() {
     }
   };
 
+  const navClass = ({ isActive }) =>
+    `nav-link${isActive ? ' nav-link--active' : ''}`;
+
   return (
     <header className="header">
       <div className="header-container">
-        <Link to="/" className="logo">
+        <Link to={isAuthenticated ? '/' : '/'} className="logo">
           <svg className="logo-icon" viewBox="0 0 32 36" aria-hidden="true">
             <path
               d="M16 1L2 8v12c0 9.5 6.2 18.3 14 21 7.8-2.7 14-11.5 14-21V8L16 1z"
@@ -118,14 +124,11 @@ export default function Header() {
         <nav className="nav">
           {isAuthenticated ? (
             <>
-              <Link to="/home" className="nav-link">Home</Link>
-              <Link to="/assets" className="nav-link">Assets</Link>
-              <Link to="/transactions" className="nav-link">Activity</Link>
-              {user?.role !== 'admin' && (
-                <Link to="/borrow-history" className="nav-link">Borrow History</Link>
-              )}
+              <NavLink to="/" end className={navClass}>Home</NavLink>
+              <NavLink to="/assets" className={navClass}>Assets</NavLink>
+              <NavLink to="/transactions" className={navClass}>Transactions</NavLink>
               {user?.role === 'admin' && (
-                <div className="admin-menu">
+                <div className={`admin-menu${isAdminRoute ? ' admin-menu--active' : ''}`}>
                   <span className="nav-link admin-label">Admin</span>
                   <div className="admin-dropdown">
                     <Link to="/admin/dashboard" className="dropdown-link">Dashboard</Link>
@@ -136,13 +139,13 @@ export default function Header() {
                   </div>
                 </div>
               )}
-              <Link to="/profile" className="nav-link">Profile</Link>
-              <Link to="/about" className="nav-link">About</Link>
+              <NavLink to="/profile" className={navClass}>Profile</NavLink>
+              <NavLink to="/about" className={navClass}>About</NavLink>
             </>
           ) : (
             <>
-              <Link to="/" className="nav-link">Home</Link>
-              <Link to="/about" className="nav-link">About</Link>
+              <NavLink to="/" end className={navClass}>Home</NavLink>
+              <NavLink to="/about" className={navClass}>About</NavLink>
             </>
           )}
         </nav>

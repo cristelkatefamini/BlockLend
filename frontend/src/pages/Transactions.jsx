@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { borrowAPI } from '../utils/api';
+import { exportBorrowsPDF } from '../utils/pdfReport';
 import '../styles/pages/Transactions.css';
 
 const STATUS_COLORS = {
@@ -58,11 +59,22 @@ export default function Transactions() {
   }
 
   return (
-    <div className="transactions-page">
+    <div className="transactions-page page-container">
       <div className="container">
         <div className="page-header">
-          <h1>Activity</h1>
-          <p>A summary of all your borrow activity</p>
+          <div className="page-header-main">
+            <div>
+              <h1>Transactions</h1>
+              <p>Track your borrow requests and activity history</p>
+            </div>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => exportBorrowsPDF(borrows)}
+              disabled={loading || borrows.length === 0}
+            >
+              ⬇ Export PDF
+            </button>
+          </div>
         </div>
 
         {error && <div className="alert alert-danger">{error}</div>}

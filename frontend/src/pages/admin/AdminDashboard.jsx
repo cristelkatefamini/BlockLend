@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="admin-container">
+    <div className="admin-container page-container">
       <div className="container">
         <div className="admin-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

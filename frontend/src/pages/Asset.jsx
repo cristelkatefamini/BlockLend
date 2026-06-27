@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { assetAPI, borrowAPI } from '../utils/api';
+import { exportAssetsPDF } from '../utils/pdfReport';
 import '../styles/pages/Asset.css';
 
 export default function Asset() {
@@ -112,16 +113,11 @@ export default function Asset() {
   }
 
   return (
-    <div className="asset-container">
+    <div className="asset-container page-container">
       <div className="container">
-        <div className="page-header">
-          <h1>Available Assets</h1>
-          <p>{isAdmin ? 'Browse all available assets' : 'Browse and request to borrow available assets'}</p>
-        </div>
-
         {error && <div className="alert alert-danger">{error}</div>}
 
-        <div className="filter-section" style={{ marginBottom: '1rem' }}>
+        <div className="filter-section">
           <div className="search-box">
             <input
               type="text"
@@ -131,6 +127,13 @@ export default function Asset() {
               className="search-input"
             />
           </div>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => exportAssetsPDF(assets)}
+            disabled={loading || assets.length === 0}
+          >
+            ⬇ Export PDF
+          </button>
           <div className="filter-group">
             <label>Asset Type:</label>
             <select
@@ -162,7 +165,6 @@ export default function Asset() {
                   <p className="asset-type">Type: {asset.asset_type}</p>
                   {asset.description && <p className="asset-description">Description: {asset.description}</p>}
                   <p className="asset-quantity">Quantity Available: {asset.quantity}</p>
-                  <p className="asset-location">Location: {asset.location || 'N/A'}</p>
                   
                   <div className="asset-status">
                     <span className={`badge badge-${asset.in_stock ? 'success' : 'warning'}`}>
@@ -207,7 +209,6 @@ export default function Asset() {
                 <p><strong>Type:</strong> {selectedAsset.asset_type}</p>
                 {selectedAsset.description && <p><strong>Description:</strong> {selectedAsset.description}</p>}
                 <p><strong>Available Quantity:</strong> {selectedAsset.quantity}</p>
-                <p><strong>Location:</strong> {selectedAsset.location || 'N/A'}</p>
 
                 <form onSubmit={handleBorrowSubmit}>
                   <div className="form-group">

@@ -32,7 +32,7 @@ def serialize_user(user_doc, points: dict | None = None):
         "full_name": user_doc.get("full_name") or user_doc.get("fullName"),
         "phone_number": user_doc.get("phone_number") or user_doc.get("phoneNumber"),
         "address": user_doc.get("address"),
-        "department": user_doc.get("department"),
+        "tupt_id": user_doc.get("tupt_id") or user_doc.get("department"),
         "section": user_doc.get("section"),
         "role": user_doc.get("role", "user"),
         "kyc_verified": user_doc.get("kyc_verified", False),
@@ -94,7 +94,7 @@ async def update_profile(
             "full_name": ["full_name", "fullName"],
             "phone_number": ["phone_number", "phoneNumber"],
             "address": ["address"],
-            "department": ["department"],
+            "tupt_id": ["tupt_id", "department"],
             "section": ["section"],
         }
 

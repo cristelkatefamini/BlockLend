@@ -67,6 +67,10 @@
   color: var(--landing-orange);
 }
 
+.nav-link--active {
+  color: var(--landing-orange);
+}
+
 .user-section {
   display: flex;
   align-items: center;
@@ -257,8 +261,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--landing-orange);
+  color: var(--landing-navy);
   font-weight: bold;
+}
+
+.admin-menu--active .admin-label,
+.admin-menu:hover .admin-label {
+  color: var(--landing-orange);
 }
 
 .admin-label::after {

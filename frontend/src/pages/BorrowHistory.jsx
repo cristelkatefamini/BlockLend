@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { borrowAPI, penaltyAPI } from '../utils/api';
+import { exportBorrowsPDF } from '../utils/pdfReport';
 import '../styles/pages/BorrowHistory.css';
 
 export default function BorrowHistory() {
@@ -73,11 +74,22 @@ export default function BorrowHistory() {
   }
 
   return (
-    <div className="borrow-history-container">
+    <div className="borrow-history-container page-container">
       <div className="container">
         <div className="page-header">
-          <h1>Borrow History</h1>
-          <p>View and manage all your borrowing records</p>
+          <div className="page-header-main">
+            <div>
+              <h1>Borrow History</h1>
+              <p>View and manage all your borrowing records</p>
+            </div>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => exportBorrowsPDF(borrows)}
+              disabled={loading || borrows.length === 0}
+            >
+              ⬇ Export PDF
+            </button>
+          </div>
         </div>
 
         {error && <div className="alert alert-danger">{error}</div>}

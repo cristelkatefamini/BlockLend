@@ -143,7 +143,7 @@ export default function AdminBlockchain() {
 
   if (loading) {
     return (
-      <div className="admin-container">
+      <div className="admin-container page-container">
         <div className="container">
           <div className="loading-state">
             <div className="spinner"></div>
@@ -157,14 +157,14 @@ export default function AdminBlockchain() {
   const isConnected = networkInfo?.is_connected;
 
   return (
-    <div className="admin-container">
+    <div className="admin-container page-container">
       <div className="container">
 
         <div className="admin-header">
           <div className="bc-header-row">
             <div>
-              <h1>Blockchain — Ganache</h1>
-              <p>Network status, recorded transactions, and receipt verification</p>
+              <h1>Blockchain Transactions</h1>
+              <p>Verify network status, smart contract info, and transaction receipts</p>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
@@ -200,16 +200,16 @@ export default function AdminBlockchain() {
               <div className="bc-info-row">
                 <span>Connected</span>
                 <strong className={isConnected ? 'bc-value--green' : 'bc-value--red'}>
-                  {isConnected ? 'Yes' : 'No — start Ganache'}
+                  {isConnected ? 'Yes' : 'No'}
                 </strong>
               </div>
               <div className="bc-info-row">
-                <span>Network ID / Chain ID</span>
-                <strong>{networkInfo?.chain_id ?? '—'}</strong>
+                <span>Chain ID</span>
+                <strong>{networkInfo?.chain_id ?? 'N/A'}</strong>
               </div>
               <div className="bc-info-row">
                 <span>Latest Block</span>
-                <strong>{networkInfo?.latest_block ?? '—'}</strong>
+                <strong>{networkInfo?.latest_block ?? 'N/A'}</strong>
               </div>
             </div>
           </div>
@@ -218,12 +218,12 @@ export default function AdminBlockchain() {
             <div className="bc-info-card-title">Contract Info</div>
             <div className="bc-info-rows">
               <div className="bc-info-row">
-                <span>Contract Address</span>
+                <span>Address</span>
                 <strong className="bc-mono">{contractInfo?.contract_address || 'Not deployed'}</strong>
               </div>
               <div className="bc-info-row">
-                <span>RPC URL</span>
-                <strong className="bc-mono">{contractInfo?.network?.rpc_url || '—'}</strong>
+                <span>RPC</span>
+                <strong className="bc-mono">{contractInfo?.network?.rpc_url || 'N/A'}</strong>
               </div>
             </div>
           </div>
@@ -231,12 +231,12 @@ export default function AdminBlockchain() {
 
         {/* Receipt checker */}
         <div className="bc-section-card">
-          <div className="bc-section-title">Verify Transaction Receipt</div>
+          <div className="bc-section-title">Check Receipt</div>
           <form className="bc-receipt-form" onSubmit={handleCheckReceipt}>
             <input
               type="text"
               className="bc-hash-input"
-              placeholder="0x… enter transaction hash"
+              placeholder="Enter transaction hash"
               value={txHash}
               onChange={(e) => setTxHash(e.target.value)}
             />
@@ -299,12 +299,10 @@ export default function AdminBlockchain() {
               <table className="borrow-table">
                 <thead>
                   <tr>
-                    <th>Tx Hash</th>
-                    <th>Type</th>
+                    <th>Hash</th>
                     <th>Status</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -312,10 +310,9 @@ export default function AdminBlockchain() {
                     <tr key={tx.id || tx._id}>
                       <td>
                         <span className="bc-mono bc-hash-cell" title={tx.tx_hash}>
-                          {tx.tx_hash ? `${tx.tx_hash.slice(0, 10)}…${tx.tx_hash.slice(-6)}` : 'N/A'}
+                          {tx.tx_hash || 'N/A'}
                         </span>
                       </td>
-                      <td>{tx.tx_type || 'blockchain'}</td>
                       <td>
                         <span className={`status-badge ${
                           tx.status === 'success' ? 'status-approved' :
@@ -325,16 +322,7 @@ export default function AdminBlockchain() {
                           {tx.status || 'pending'}
                         </span>
                       </td>
-                      <td>
-                        <span className="bc-mono bc-addr-cell" title={tx.from_address}>
-                          {tx.from_address ? `${tx.from_address.slice(0, 8)}…` : '—'}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="bc-mono bc-addr-cell" title={tx.to_address}>
-                          {tx.to_address ? `${tx.to_address.slice(0, 8)}…` : '—'}
-                        </span>
-                      </td>
+                      <td>{tx.tx_type || 'blockchain'}</td>
                       <td>{tx.created_at ? new Date(tx.created_at).toLocaleString() : '—'}</td>
                     </tr>
                   ))}

@@ -58,7 +58,7 @@ export default function Home() {
   }
 
   return (
-    <div className="home-container">
+    <div className="home-container page-container">
       <div className="container">
         {/* Welcome Section */}
         <section className="welcome-section">
@@ -170,10 +170,6 @@ export default function Home() {
             <a href="/profile" className="action-button">
               <span className="action-icon">👤</span>
               <span>My Profile</span>
-            </a>
-            <a href="/borrow-history" className="action-button">
-              <span className="action-icon">📋</span>
-              <span>Borrowing History</span>
             </a>
             <a href="/about" className="action-button">
               <span className="action-icon">ℹ️</span>

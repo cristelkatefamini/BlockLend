@@ -77,19 +77,38 @@ export default function Landing() {
   };
 
   return (
-    <div className="landing">
+    <div className="landing landing--public">
       <PublicHeader />
 
       <section className="landing-hero">
         <div className="landing-hero-overlay">
-          <div className="landing-hero-headline">
-            <div className="headline-row">
-              <span className="headline-box headline-box--blue">time</span>
-              <span className="headline-box headline-box--orange">for my assets</span>
+          <div className="landing-hero-body">
+            <div className="landing-hero-copy">
+              <p className="hero-kicker">trusted lending, secured on-chain</p>
+              <h1>Formal access to shared assets, without the friction.</h1>
+              <p className="hero-description">
+                Borrow responsibly, track every exchange, and manage your community resources from one
+                secure portal.
+              </p>
+              <div className="landing-hero-actions">
+                <Link to="/register" className="landing-cta landing-cta--primary">
+                  Create account
+                </Link>
+                <Link to="/about" className="landing-cta landing-cta--secondary">
+                  Learn more
+                </Link>
+              </div>
             </div>
-            <div className="headline-row">
-              <span className="headline-box headline-box--blue">time</span>
-              <span className="headline-box headline-box--orange">for my community</span>
+
+            <div className="landing-hero-headline" aria-hidden="true">
+              <div className="headline-row">
+                <span className="headline-box headline-box--blue">time</span>
+                <span className="headline-box headline-box--orange">for my assets</span>
+              </div>
+              <div className="headline-row">
+                <span className="headline-box headline-box--blue">time</span>
+                <span className="headline-box headline-box--orange">for my community</span>
+              </div>
             </div>
           </div>
 
@@ -207,12 +226,17 @@ export default function Landing() {
                 />
               </div>
 
-              <button type="submit" className="landing-form-submit" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
-              </button>
+              <div className="landing-form-actions">
+                <button type="submit" className="landing-form-submit" disabled={loading}>
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </button>
+                <Link to="/register" className="landing-form-secondary-link">
+                  Create account
+                </Link>
+              </div>
 
               <p className="landing-form-footer">
-                Don&apos;t have an account? <Link to="/register">Create one</Link>
+                Need a better look at the platform? <Link to="/about">Learn more</Link>
               </p>
             </form>
           </div>

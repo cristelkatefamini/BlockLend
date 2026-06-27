@@ -101,30 +101,12 @@ export default function LandingLoggedIn() {
               </p>
 
               <div className="logged-in-actions">
-                <Link to="/home" className="logged-in-action logged-in-action--primary">
+                <Link
+                  to={isAdmin ? '/admin/dashboard' : '/home'}
+                  className="logged-in-action logged-in-action--primary"
+                >
                   Go to Dashboard
                 </Link>
-                {!isAdmin && (
-                  <Link to="/assets" className="logged-in-action">
-                    Browse Assets
-                  </Link>
-                )}
-                <Link to="/transactions" className="logged-in-action">
-                  Transactions
-                </Link>
-                {!isAdmin && (
-                  <Link to="/borrow-history" className="logged-in-action">
-                    Borrow History
-                  </Link>
-                )}
-                <Link to="/profile" className="logged-in-action">
-                  My Profile
-                </Link>
-                {isAdmin && (
-                  <Link to="/admin/dashboard" className="logged-in-action">
-                    Admin Dashboard
-                  </Link>
-                )}
               </div>
             </div>
           </div>

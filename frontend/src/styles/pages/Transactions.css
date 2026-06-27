@@ -1,31 +1,10 @@
 .transactions-page {
-  padding: 2rem 0 3rem;
-  min-height: calc(100vh - 120px);
+  /* extends .page-container */
 }
 
 .transactions-page .container {
   max-width: 1180px;
   padding: 0 2.5rem;
-}
-
-.transactions-page .page-header {
-  margin-bottom: 1.5rem;
-  text-align: left;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.transactions-page .page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--landing-navy);
-  margin-bottom: 0.35rem;
-}
-
-.transactions-page .page-header p {
-  font-size: 0.9rem;
-  color: #888888;
-  margin: 0;
 }
 
 /* Summary cards */

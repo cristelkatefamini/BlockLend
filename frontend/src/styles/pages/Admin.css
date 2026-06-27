@@ -1,9 +1,8 @@
 /* ==================== ADMIN PAGES (Landing theme) ==================== */
 
 .admin-container {
-  min-height: calc(100vh - 120px);
+  /* extends .page-container when both classes are applied */
   background: transparent;
-  padding: 2rem 0 3rem;
 }
 
 .admin-container .container {
@@ -532,11 +531,35 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-top: 0.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .asset-actions button {
   flex: 1;
-  min-width: 100px;
+  min-width: 90px;
+  border-radius: 0;
+}
+
+.asset-edit-btn {
+  background: var(--landing-orange);
+  border-color: var(--landing-orange);
+}
+
+.asset-edit-btn:hover {
+  background: #d06818;
+}
+
+.asset-delete-btn {
+  background: #ffffff;
+  color: var(--danger);
+  border: 1px solid #f5c6cb;
+}
+
+.asset-delete-btn:hover {
+  background: #fdf0ef;
+  border-color: var(--danger);
 }
 
 /* Asset Image */

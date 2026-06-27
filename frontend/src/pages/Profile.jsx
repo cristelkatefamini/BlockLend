@@ -29,6 +29,17 @@ function maskDate(dateStr) {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+function normalizeTuptId(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 6);
+  return digits;
+}
+
+function formatTuptId(value) {
+  const digits = normalizeTuptId(value);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+}
+
 export default function Profile() {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -61,7 +72,7 @@ export default function Profile() {
         full_name: data.full_name || '',
         phone_number: data.phone_number || '',
         address: data.address || '',
-        department: data.department || '',
+        tupt_id: data.tupt_id ? data.tupt_id.replace(/^TUPT-/, '') : '',
         section: data.section || '',
       });
     } catch (err) {
@@ -74,7 +85,8 @@ export default function Profile() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const updatedValue = name === 'tupt_id' ? normalizeTuptId(value) : value;
+    setFormData((prev) => ({ ...prev, [name]: updatedValue }));
     setError('');
     setSuccess('');
   };
@@ -90,8 +102,20 @@ export default function Profile() {
     setSuccess('');
     setSubmitting(true);
     try {
-      const response = await userAPI.updateProfile(formData);
-      setProfile(response.data || response);
+      const payload = {
+        ...formData,
+        tupt_id: formData.tupt_id ? `TUPT-${formatTuptId(formData.tupt_id)}` : '',
+      };
+      const response = await userAPI.updateProfile(payload);
+      const data = response.data || response;
+      setProfile(data);
+      setFormData({
+        full_name: data.full_name || '',
+        phone_number: data.phone_number || '',
+        address: data.address || '',
+        tupt_id: data.tupt_id ? data.tupt_id.replace(/^TUPT-/, '') : '',
+        section: data.section || '',
+      });
       setSuccess('Profile updated successfully!');
     } catch (err) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Failed to update profile');
@@ -173,7 +197,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="profile-page">
+      <div className="profile-page page-container">
         <div className="loading">
           <div className="spinner"></div>
         </div>
@@ -182,7 +206,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="profile-page">
+    <div className="profile-page page-container">
       <div className="profile-page-inner">
         {error && <div className="alert alert-danger profile-alert">{error}</div>}
         {success && <div className="alert alert-success profile-alert">{success}</div>}
@@ -254,7 +278,7 @@ export default function Profile() {
                     <Link to="/borrow-history" className="sidebar-nav-link">Borrow History</Link>
                   </li>
                   <li>
-                    <Link to="/transactions" className="sidebar-nav-link">Activity</Link>
+                    <Link to="/transactions" className="sidebar-nav-link">Transactions</Link>
                   </li>
                 </ul>
               </div>
@@ -382,30 +406,43 @@ export default function Profile() {
                       </div>
 
                       <div className="profile-field-row">
-                        <label className="profile-field-label" htmlFor="department">Department</label>
+                        <label className="profile-field-label" htmlFor="tupt_id">TUPT ID</label>
                         <div className="profile-field-value">
-                          <input
-                            id="department"
-                            type="text"
-                            name="department"
-                            value={formData.department || ''}
-                            onChange={handleChange}
-                            placeholder="Enter department"
-                          />
+                          <div className="profile-tupt-row">
+                            <span className="tupt-prefix">TUPT-</span>
+                            <input
+                              id="tupt_id"
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={7}
+                              name="tupt_id"
+                              value={formatTuptId(formData.tupt_id || '')}
+                              onChange={handleChange}
+                              placeholder="xx-xxxx"
+                            />
+                          </div>
                         </div>
                       </div>
 
                       <div className="profile-field-row">
                         <label className="profile-field-label" htmlFor="section">Section</label>
                         <div className="profile-field-value">
-                          <input
+                          <select
                             id="section"
-                            type="text"
                             name="section"
                             value={formData.section || ''}
                             onChange={handleChange}
-                            placeholder="Enter section"
-                          />
+                          >
+                            <option value="">Select section</option>
+                            <option value="BSIT-1A">BSIT-1A</option>
+                            <option value="BSIT-1B">BSIT-1B</option>
+                            <option value="BSIT-NS-2A">BSIT-NS-2A</option>
+                            <option value="BSIT-S-2A">BSIT-S-2A</option>
+                            <option value="BSIT-S-3A">BSIT-S-3A</option>
+                            <option value="BSIT-NS-3A">BSIT-NS-3A</option>
+                            <option value="BSIT-S-4A">BSIT-S-4A</option>
+                            <option value="BSIT-NS-4A">BSIT-NS-4A</option>
+                          </select>
                         </div>
                       </div>
 
@@ -424,8 +461,6 @@ export default function Profile() {
                         </div>
                       </div>
                     </div>
-
-                    <div className="profile-form-divider" />
 
                     <div className="profile-avatar-section">
                       <div className="profile-avatar-large">

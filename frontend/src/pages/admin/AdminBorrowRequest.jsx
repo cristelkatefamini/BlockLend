@@ -181,7 +181,7 @@ export default function AdminBorrowRequest() {
   });
 
   return (
-    <div className="admin-container">
+    <div className="admin-container page-container">
       <div className="container">
         <div className="admin-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -465,7 +465,7 @@ export default function AdminBorrowRequest() {
                     </div>
                     <div className="detail-group"><label>Email</label><p>{detailUser.email || '-'}</p></div>
                     <div className="detail-group"><label>Phone</label><p>{detailUser.phone_number || '-'}</p></div>
-                    <div className="detail-group"><label>Department</label><p>{detailUser.department || '-'}</p></div>
+                    <div className="detail-group"><label>TUPT ID</label><p>{detailUser.tupt_id || detailUser.department || '-'}</p></div>
                     <div className="detail-group"><label>Section</label><p>{detailUser.section || '-'}</p></div>
                     <div className="detail-group"><label>Address</label><p>{detailUser.address || '-'}</p></div>
                     <div className="detail-group">

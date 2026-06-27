@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import DocumentTitle from './components/DocumentTitle';
 
 // Pages
 import Landing from './pages/Landing';
@@ -36,6 +37,7 @@ function AppLayout() {
 
   return (
     <div className="app">
+      <DocumentTitle />
       {!isPublicMarketingPage && <Header />}
 
       <main className="main-content">

@@ -416,6 +416,97 @@ tbody tr:hover {
   padding: 0 var(--spacing-lg);
 }
 
+/* ==================== SHARED PAGE LAYOUT ==================== */
+
+.page-container {
+  padding: 2rem 0 3rem;
+  min-height: calc(100vh - 120px);
+}
+
+.page-container .container {
+  max-width: 1180px;
+  padding: 0 2.5rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--landing-navy);
+  margin-bottom: 0.35rem;
+}
+
+.page-header p {
+  font-size: 0.9rem;
+  color: #888888;
+  margin: 0;
+}
+
+.filter-section {
+  background: #ffffff;
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  box-shadow: none;
+  border: 1px solid #e8e8e8;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 220px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 0;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--landing-heading-blue);
+  box-shadow: none;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555555;
+}
+
+.filter-select {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 0;
+  font-size: 0.875rem;
+  background: #ffffff;
+  min-width: 160px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--landing-heading-blue);
+}
+
 .loading {
   display: flex;
   justify-content: center;

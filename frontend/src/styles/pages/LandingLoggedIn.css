@@ -53,6 +53,7 @@
   background: var(--landing-orange);
   border-color: var(--landing-orange);
   color: #ffffff;
+  width: 100%;
 }
 
 .logged-in-action--primary:hover {

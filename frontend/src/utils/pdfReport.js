@@ -229,7 +229,6 @@ export function exportAssetsPDF(assets) {
       <td>${a.name || '—'}</td>
       <td>${a.asset_type || '—'}</td>
       <td>${a.quantity ?? 0}</td>
-      <td>${a.location || '—'}</td>
       <td>${a.serial_number || '—'}</td>
       <td>${a.in_stock ? badge('In Stock', 'success') : badge('Out of Stock', 'warning')}</td>
     </tr>
@@ -245,7 +244,7 @@ export function exportAssetsPDF(assets) {
     <table>
       <thead><tr>
         <th>Name</th><th>Type</th><th>Quantity</th>
-        <th>Location</th><th>Serial No.</th><th>Status</th>
+        <th>Serial No.</th><th>Status</th>
       </tr></thead>
       <tbody>${rows || '<tr><td colspan="6">No assets found</td></tr>'}</tbody>
     </table>

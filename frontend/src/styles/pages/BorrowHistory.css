@@ -1,6 +1,5 @@
 .borrow-history-container {
-  padding: 2rem 0 3rem;
-  min-height: calc(100vh - 120px);
+  /* extends .page-container */
 }
 
 .borrow-history-container .container {

@@ -18,7 +18,6 @@ export default function AdminAssetsManagement() {
     asset_type: 'Office Supplies',
     description: '',
     quantity: 1,
-    location: '',
     serial_number: '',
     image: null,
     imagePreview: null
@@ -85,7 +84,6 @@ export default function AdminAssetsManagement() {
         const normalizedName = newAsset.name?.trim() || '';
         const normalizedAssetType = newAsset.asset_type?.trim() || '';
         const normalizedDescription = newAsset.description?.trim() || '';
-        const normalizedLocation = newAsset.location?.trim() || '';
         const normalizedSerialNumber = newAsset.serial_number?.trim() || '';
         const normalizedQuantity = Number.isFinite(newAsset.quantity) ? newAsset.quantity : 0;
 
@@ -93,7 +91,6 @@ export default function AdminAssetsManagement() {
         if (normalizedAssetType) formData.append('asset_type', normalizedAssetType);
         formData.append('description', normalizedDescription);
         formData.append('quantity', String(normalizedQuantity));
-        formData.append('location', normalizedLocation);
         formData.append('serial_number', normalizedSerialNumber);
         if (newAsset.image) formData.append('image', newAsset.image);
       } else {
@@ -102,7 +99,6 @@ export default function AdminAssetsManagement() {
         formData.append('asset_type', newAsset.asset_type);
         formData.append('description', newAsset.description);
         formData.append('quantity', newAsset.quantity);
-        formData.append('location', newAsset.location);
         formData.append('serial_number', newAsset.serial_number || '');
         if (newAsset.image) {
           formData.append('image', newAsset.image);
@@ -135,6 +131,8 @@ export default function AdminAssetsManagement() {
 
       const data = await response.json();
       
+      const wasEditing = Boolean(editingAssetId);
+      
       if (editingAssetId) {
         setAssets(prevAssets =>
           prevAssets.map(a => a._id === editingAssetId ? data.data : a)
@@ -149,13 +147,12 @@ export default function AdminAssetsManagement() {
         asset_type: 'Office Supplies',
         description: '',
         quantity: 1,
-        location: '',
         serial_number: '',
         image: null,
         imagePreview: null
       });
       setShowForm(false);
-      alert(`Asset ${editingAssetId ? 'updated' : 'created'} successfully!`);
+      alert(`Asset ${wasEditing ? 'updated' : 'created'} successfully!`);
     } catch (err) {
       console.error('Error saving asset:', err);
       alert(`Failed to ${editingAssetId ? 'update' : 'create'} asset. Please try again.`);
@@ -238,36 +235,15 @@ export default function AdminAssetsManagement() {
     }
   };
 
-  const handleDeleteAsset = async (assetId) => {
-    if (!confirm('Are you sure you want to delete this asset?')) return;
+  const handleDisableAsset = async (assetId) => {
+    const asset = assets.find(a => a._id === assetId);
+    if (!asset) return;
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/assets/${assetId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const action = asset.in_stock ? 'disable' : 'enable';
+    if (asset.in_stock && !confirm('Are you sure you want to disable this asset?')) return;
 
-      if (!response.ok) {
-        let errorMessage = 'Failed to delete asset';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData?.detail || errorData?.message || errorMessage;
-        } catch {
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(`${errorMessage} (${response.status})`);
-      }
-
-      setAssets(prevAssets => prevAssets.filter(asset => asset._id !== assetId));
-      alert('Asset deleted successfully!');
-    } catch (err) {
-      console.error('Error deleting asset:', err);
-      alert('Failed to delete asset. Please try again.');
-    }
+    await handleToggleAvailability(assetId);
+    alert(`Asset ${action}d successfully.`);
   };
 
   const handleImageSelect = (e) => {
@@ -289,15 +265,15 @@ export default function AdminAssetsManagement() {
     setNewAsset({
       name: asset.name,
       asset_type: asset.asset_type,
-      description: asset.description,
+      description: asset.description || '',
       quantity: asset.quantity,
-      location: asset.location,
       serial_number: asset.serial_number || '',
       image: null,
       imagePreview: asset.image_url || null
     });
     setEditingAssetId(asset._id);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
@@ -307,15 +283,34 @@ export default function AdminAssetsManagement() {
       asset_type: 'Office Supplies',
       description: '',
       quantity: 1,
-      location: '',
       serial_number: '',
       image: null,
       imagePreview: null
     });
+    setShowForm(false);
+  };
+
+  const handleToggleForm = () => {
+    if (showForm) {
+      handleCancelEdit();
+      return;
+    }
+
+    setEditingAssetId(null);
+    setNewAsset({
+      name: '',
+      asset_type: 'Office Supplies',
+      description: '',
+      quantity: 1,
+      serial_number: '',
+      image: null,
+      imagePreview: null
+    });
+    setShowForm(true);
   };
 
   return (
-    <div className="admin-container">
+    <div className="admin-container page-container">
       <div className="container">
         <div className="admin-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -361,7 +356,7 @@ export default function AdminAssetsManagement() {
 
           <button 
             className="btn btn-primary"
-            onClick={() => setShowForm(!showForm)}
+            onClick={handleToggleForm}
           >
             {showForm ? 'Cancel' : '+ Add New Asset'}
           </button>
@@ -384,7 +379,7 @@ export default function AdminAssetsManagement() {
           <>
             {/* Add Asset Form */}
             {showForm && (
-              <div className="asset-form-card">
+              <div className="asset-form-card" id="asset-form">
                 <h2>{editingAssetId ? 'Edit Asset' : 'Add New Asset'}</h2>
                 <form onSubmit={handleAddAsset}>
                   <div className="form-group">
@@ -437,16 +432,6 @@ export default function AdminAssetsManagement() {
                       value={newAsset.serial_number}
                       onChange={(e) => setNewAsset({...newAsset, serial_number: e.target.value})}
                       placeholder="Enter serial number (optional)"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Location:</label>
-                    <input
-                      type="text"
-                      value={newAsset.location}
-                      onChange={(e) => setNewAsset({...newAsset, location: e.target.value})}
-                      placeholder="Enter asset location"
                     />
                   </div>
 
@@ -530,27 +515,22 @@ export default function AdminAssetsManagement() {
                           +
                         </button>
                       </div>
-                      <p><strong>Location:</strong> {asset.location || 'N/A'}</p>
                     </div>
 
                     <div className="asset-actions">
                       <button
-                        className="btn-edit"
+                        type="button"
+                        className="btn btn-primary btn-sm asset-edit-btn"
                         onClick={() => handleEditAsset(asset)}
                       >
                         Edit
                       </button>
                       <button
-                        className={`btn-toggle ${asset.in_stock ? 'btn-available' : 'btn-unavailable'}`}
-                        onClick={() => handleToggleAvailability(asset._id)}
+                        type="button"
+                        className={`btn btn-${asset.in_stock ? 'warning' : 'secondary'} btn-sm asset-disable-btn`}
+                        onClick={() => handleDisableAsset(asset._id)}
                       >
-                        {asset.in_stock ? 'Mark Out of Stock' : 'Mark In Stock'}
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDeleteAsset(asset._id)}
-                      >
-                        Delete
+                        {asset.in_stock ? 'Disable' : 'Enable'}
                       </button>
                     </div>
                   </div>

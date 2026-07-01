@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ToastContainer from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import DocumentTitle from './components/DocumentTitle';
 
@@ -16,6 +18,7 @@ import BorrowHistory from './pages/BorrowHistory';
 import Transactions from './pages/Transactions';
 import Profile from './pages/Profile';
 import About from './pages/About';
+import Chat from './pages/Chat';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -42,110 +45,120 @@ function AppLayout() {
 
       <main className="main-content">
         <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={isAuthenticated ? <LandingLoggedIn /> : <Landing />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/about" element={<About />} />
+          {/* Public Routes */}
+          <Route path="/" element={isAuthenticated ? <LandingLoggedIn /> : <Landing />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/about" element={<About />} />
 
-              {/* Protected Routes */}
-              <Route
-                path="/home"
-                element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                }
-              />
+          {/* Protected Routes */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/assets"
-                element={
-                  <ProtectedRoute>
-                    <Asset />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/assets"
+            element={
+              <ProtectedRoute>
+                <Asset />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/borrow-history"
-                element={
-                  <ProtectedRoute>
-                    <BorrowHistory />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/borrow-history"
+            element={
+              <ProtectedRoute>
+                <BorrowHistory />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Transactions />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
-              {/* Admin Routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/admin/borrow-requests"
-                element={
-                  <ProtectedRoute>
-                    <AdminBorrowRequest />
-                  </ProtectedRoute>
-                }
-              />
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/admin/assets"
-                element={
-                  <ProtectedRoute>
-                    <AdminAssetsManagement />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/admin/borrow-requests"
+            element={
+              <ProtectedRoute>
+                <AdminBorrowRequest />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/admin/users"
-                element={
-                  <ProtectedRoute>
-                    <AdminUsersManagement />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/admin/assets"
+            element={
+              <ProtectedRoute>
+                <AdminAssetsManagement />
+              </ProtectedRoute>
+            }
+          />
 
-              <Route
-                path="/admin/blockchain"
-                element={
-                  <ProtectedRoute>
-                    <AdminBlockchain />
-                  </ProtectedRoute>
-                }
-              />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsersManagement />
+              </ProtectedRoute>
+            }
+          />
 
-              {/* Catch all */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+          <Route
+            path="/admin/blockchain"
+            element={
+              <ProtectedRoute>
+                <AdminBlockchain />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
       {!isPublicMarketingPage && <Footer />}
+      <ToastContainer />
     </div>
   );
 }
@@ -154,7 +167,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppLayout />
+        <ChatProvider>
+          <AppLayout />
+        </ChatProvider>
       </AuthProvider>
     </Router>
   );

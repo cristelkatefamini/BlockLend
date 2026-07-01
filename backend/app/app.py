@@ -91,6 +91,7 @@ from routes.admin import router as admin_router
 from routes.borrow import router as borrow_router
 from routes.blockchain import router as blockchain_router
 from routes.notifications import router as notifications_router
+from routes.messages import router as messages_router
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])
@@ -99,6 +100,7 @@ app.include_router(admin_router, tags=["admin"])
 app.include_router(borrow_router, tags=["borrow"])
 app.include_router(blockchain_router, tags=["blockchain"])
 app.include_router(notifications_router, tags=["notifications"])
+app.include_router(messages_router, tags=["messages"])
 
 if __name__ == '__main__':
     import uvicorn

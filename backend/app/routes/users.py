@@ -356,6 +356,121 @@ async def reset_user_warnings(
         raise HTTPException(status_code=500, detail=f"Failed to reset warnings: {str(e)}")
 
 
+@router.put("/{user_id}/verify")
+async def verify_user(
+    user_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Mark a user as KYC-verified (admin only). User must have full_name and section filled."""
+    try:
+        if current_user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Only admins can verify users")
+        if not ObjectId.is_valid(user_id):
+            raise HTTPException(status_code=400, detail="Invalid user ID")
+
+        users = database.get_collection("users")
+        user_doc = users.find_one({"_id": ObjectId(user_id)})
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="User not found")
+        if user_doc.get("role") == "admin":
+            raise HTTPException(status_code=400, detail="Admin accounts do not require verification")
+
+        # Require at minimum: full_name and section
+        if not user_doc.get("full_name") or not user_doc.get("section"):
+            raise HTTPException(
+                status_code=400,
+                detail="User must fill in their Name and Section before they can be verified.",
+            )
+
+        users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"kyc_verified": True, "updated_at": datetime.utcnow()}},
+        )
+
+        create_notification(
+            user_id,
+            "account_update",
+            "Account Verified ✓",
+            "Your account has been verified by an admin. You can now borrow assets.",
+        )
+
+        updated_user = users.find_one({"_id": ObjectId(user_id)})
+        return {
+            "success": True,
+            "message": "User verified successfully",
+            "data": serialize_user(updated_user),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to verify user: {str(e)}")
+
+
+@router.put("/{user_id}/unverify")
+async def unverify_user(
+    user_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Remove KYC verification from a user (admin only)."""
+    try:
+        if current_user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Only admins can manage users")
+        if not ObjectId.is_valid(user_id):
+            raise HTTPException(status_code=400, detail="Invalid user ID")
+
+        users = database.get_collection("users")
+        user_doc = users.find_one({"_id": ObjectId(user_id)})
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"kyc_verified": False, "updated_at": datetime.utcnow()}},
+        )
+        updated_user = users.find_one({"_id": ObjectId(user_id)})
+        return {
+            "success": True,
+            "message": "User verification removed",
+            "data": serialize_user(updated_user),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to unverify user: {str(e)}")
+
+
+@router.post("/{user_id}/notify-credentials")
+async def notify_fill_credentials(
+    user_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Send a notification asking user to fill in their profile info (admin only)."""
+    try:
+        if current_user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Only admins can send notifications")
+        if not ObjectId.is_valid(user_id):
+            raise HTTPException(status_code=400, detail="Invalid user ID")
+
+        users = database.get_collection("users")
+        user_doc = users.find_one({"_id": ObjectId(user_id)})
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        create_notification(
+            user_id,
+            "account_update",
+            "Complete Your Profile",
+            "An admin has requested that you fill in your profile details (Full Name, Section) "
+            "before your account can be verified. Please go to Profile → Edit to update your information.",
+        )
+
+        return {"success": True, "message": "Notification sent to user"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send notification: {str(e)}")
+
+
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: str,

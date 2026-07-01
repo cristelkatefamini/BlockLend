@@ -12,12 +12,12 @@ export default function LandingLoggedIn() {
         <div className="landing-hero-overlay">
           <div className="landing-hero-headline">
             <div className="headline-row">
-              <span className="headline-box headline-box--blue">welcome back</span>
-              <span className="headline-box headline-box--orange">{user?.username}</span>
+              <span className="headline-box headline-box--blue">Welcome back,</span>
+              <span className="headline-box headline-box--orange">{user?.username}.</span>
             </div>
             <div className="headline-row">
-              <span className="headline-box headline-box--blue">time</span>
-              <span className="headline-box headline-box--orange">for your assets</span>
+              <span className="headline-box headline-box--blue">Time</span>
+              <span className="headline-box headline-box--orange">for your assets!</span>
             </div>
           </div>
 

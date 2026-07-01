@@ -94,6 +94,57 @@
   border: 1px solid #e8e8e8;
 }
 
+/* ── Notification modal ───────────────────────────────────────── */
+.notify-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(27, 54, 93, 0.18);
+  padding: 2rem 2rem 1.5rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notify-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.notify-modal-icon--success { background: #d4edda; color: #155724; }
+.notify-modal-icon--error   { background: #f8d7da; color: #721c24; }
+.notify-modal-icon--warning { background: #fff3cd; color: #856404; }
+
+.notify-modal-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--landing-navy);
+  margin: 0;
+}
+
+.notify-modal-message {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.notify-modal-btn {
+  margin-top: 0.5rem;
+  min-width: 100px;
+  border-radius: 4px;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;

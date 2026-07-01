@@ -1,0 +1,399 @@
+/* ==================== CHAT WIDGET ==================== */
+
+/* ── Trigger wrapper — sits inline in the nav ── */
+.cw-trigger-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cw-trigger-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.3rem;
+  line-height: 1;
+  color: var(--landing-navy);
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+}
+
+.cw-trigger-btn:hover { opacity: 0.65; }
+
+.cw-unread-badge {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  background: var(--landing-orange);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Dropdown — anchored to the trigger wrapper ── */
+.cw-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 320px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border: 1px solid rgba(27, 54, 93, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(27, 54, 93, 0.18);
+  z-index: 1100;
+  overflow: hidden;
+}
+
+/* Small arrow pointer above the dropdown */
+.cw-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-left: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
+  transform: rotate(45deg);
+}
+
+.cw-dropdown-header {
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--landing-navy);
+  border-bottom: 1px solid rgba(27, 54, 93, 0.06);
+  background: rgba(27, 54, 93, 0.03);
+}
+
+.cw-dropdown-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.cw-dropdown-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.875rem;
+}
+
+/* ── Conversation items ── */
+.cw-conv-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(27, 54, 93, 0.05);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.cw-conv-item:hover {
+  background: rgba(22, 42, 72, 0.04);
+  transform: translateY(-1px);
+}
+.cw-conv-item:last-child { border-bottom: none; }
+
+.cw-conv-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--landing-navy);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.cw-conv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.cw-conv-info { flex: 1; min-width: 0; }
+
+.cw-conv-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cw-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--landing-orange);
+  flex-shrink: 0;
+}
+
+.cw-conv-last {
+  font-size: 0.78rem;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.1rem;
+}
+
+/* ── Floating chat windows ── */
+.cw-window {
+  position: fixed;
+  bottom: 0;
+  width: 316px;
+  background: #fff;
+  border: 1px solid rgba(27, 54, 93, 0.1);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 32px rgba(27, 54, 93, 0.16);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.cw-window-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  background: linear-gradient(135deg, var(--landing-navy) 0%, #223a5d 100%);
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.cw-window-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--landing-orange);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.cw-window-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.cw-window-title {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cw-window-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  line-height: 1;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+
+.cw-window-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.cw-window-delete {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  line-height: 1;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  transition: background 0.12s, color 0.12s;
+}
+
+.cw-window-delete:hover {
+  background: rgba(220, 53, 69, 0.35);
+  color: #fff;
+}
+
+.cw-window-messages {
+  height: 300px;
+  overflow-y: auto;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: linear-gradient(180deg, #f8f9fb 0%, #eef3f8 100%);
+}
+
+.cw-window-empty {
+  margin: auto;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
+/* Message rows */
+.cw-msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  max-width: 82%;
+}
+
+.cw-msg-row--mine   { align-self: flex-end;  flex-direction: row-reverse; }
+.cw-msg-row--theirs { align-self: flex-start; }
+
+.cw-msg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cw-msg-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--landing-navy);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cw-msg-sender {
+  font-size: 0.65rem;
+  color: #888;
+  padding: 0 0.35rem;
+}
+
+.cw-bubble {
+  padding: 0.55rem 0.8rem;
+  border-radius: 18px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  word-break: break-word;
+  max-width: 100%;
+  box-shadow: 0 6px 16px rgba(27, 54, 93, 0.08);
+}
+
+.cw-bubble--mine {
+  background: var(--landing-navy);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.cw-bubble--theirs {
+  background: #fff;
+  color: #222;
+  border: 1px solid #e8e8e8;
+  border-bottom-left-radius: 4px;
+}
+
+.cw-msg-time {
+  font-size: 0.62rem;
+  color: #bbb;
+  padding: 0 0.35rem;
+}
+
+.cw-msg-row--mine .cw-msg-time   { text-align: right; }
+.cw-msg-row--theirs .cw-msg-time { text-align: left; }
+
+/* Input */
+.cw-window-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-top: 1px solid rgba(27, 54, 93, 0.06);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.cw-window-input {
+  flex: 1;
+  resize: none;
+  border: none;
+  background: #f2f5f9;
+  border-radius: 18px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  line-height: 1.4;
+  max-height: 80px;
+  overflow-y: auto;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(27, 54, 93, 0.06);
+}
+
+.cw-window-input:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 54, 93, 0.16), 0 0 0 3px rgba(250, 126, 37, 0.12);
+}
+
+.cw-window-send {
+  min-width: 76px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--landing-orange);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.95rem;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 18px rgba(250, 126, 37, 0.22);
+}
+
+.cw-window-send:hover:not(:disabled) {
+  background: #d06818;
+  transform: translateY(-1px);
+}
+.cw-window-send:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+.cw-window-send span {
+  line-height: 1;
+}

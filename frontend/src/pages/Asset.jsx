@@ -1,12 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { assetAPI, borrowAPI } from '../utils/api';
-import { exportAssetsPDF } from '../utils/pdfReport';
 import '../styles/pages/Asset.css';
 
+/* ── Simple inline notification modal ────────────────────────── */
+function NotifyModal({ type, title, message, onClose }) {
+  if (!message) return null;
+  const icons = { success: '✓', error: '✕', warning: '⚠' };
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="notify-modal" onClick={e => e.stopPropagation()}>
+        <div className={`notify-modal-icon notify-modal-icon--${type}`}>
+          {icons[type] || '!'}
+        </div>
+        {title && <h3 className="notify-modal-title">{title}</h3>}
+        <p className="notify-modal-message">{message}</p>
+        <button className="btn btn-primary notify-modal-btn" onClick={onClose}>
+          OK
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Asset() {
-  const { isAdmin } = useAuth();
-  const [assets, setAssets] = useState([]);
+  const { isAdmin } = useAuth();  const [assets, setAssets] = useState([]);
   const [filteredAssets, setFilteredAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,6 +36,12 @@ export default function Asset() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAssetType, setSelectedAssetType] = useState('all');
+
+  // Notification modal state
+  const [notify, setNotify] = useState(null); // { type, title, message }
+
+  const showNotify = (type, title, message) => setNotify({ type, title, message });
+  const closeNotify = () => setNotify(null);
 
   useEffect(() => {
     fetchAssets();
@@ -53,11 +77,9 @@ export default function Asset() {
         asset.name?.toLowerCase().includes(term) ||
         asset.description?.toLowerCase().includes(term) ||
         asset.asset_type?.toLowerCase().includes(term);
-
       const matchesType = selectedAssetType === 'all' || asset.asset_type === selectedAssetType;
       return matchesSearch && matchesType;
     });
-
     setFilteredAssets(nextAssets);
   }, [searchTerm, selectedAssetType, assets]);
 
@@ -70,15 +92,15 @@ export default function Asset() {
     const durationDays = parseInt(formData.get('duration_days') || borrowDays, 10);
 
     if (Number.isNaN(borrowQty) || borrowQty < 1) {
-      alert('Please enter a valid quantity (at least 1).');
+      showNotify('warning', 'Invalid Quantity', 'Please enter a valid quantity (at least 1).');
       return;
     }
     if (borrowQty > selectedAsset.quantity) {
-      alert(`Only ${selectedAsset.quantity} item(s) available.`);
+      showNotify('warning', 'Quantity Exceeds Stock', `Only ${selectedAsset.quantity} item(s) are available.`);
       return;
     }
     if (Number.isNaN(durationDays) || durationDays < 1) {
-      alert('Please enter a valid duration (at least 1 day).');
+      showNotify('warning', 'Invalid Duration', 'Please enter a valid duration (at least 1 day).');
       return;
     }
 
@@ -90,15 +112,16 @@ export default function Asset() {
         quantity: borrowQty,
         reason: borrowReason,
       });
-      alert('Borrow request submitted successfully!');
       setShowBorrowModal(false);
       setSelectedAsset(null);
       setBorrowReason('');
       setBorrowDays('7');
       setBorrowQuantityInput('1');
       await fetchAssets();
+      showNotify('success', 'Request Submitted', 'Your borrow request has been submitted successfully! An admin will review it shortly.');
     } catch (err) {
-      alert(err.response?.data?.detail || err.response?.data?.message || 'Failed to submit borrow request');
+      const msg = err.response?.data?.detail || err.response?.data?.message || 'Failed to submit borrow request.';
+      showNotify('error', 'Request Failed', msg);
     } finally {
       setSubmitting(false);
     }
@@ -127,13 +150,6 @@ export default function Asset() {
               className="search-input"
             />
           </div>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => exportAssetsPDF(assets)}
-            disabled={loading || assets.length === 0}
-          >
-            ⬇ Export PDF
-          </button>
           <div className="filter-group">
             <label>Asset Type:</label>
             <select
@@ -165,7 +181,7 @@ export default function Asset() {
                   <p className="asset-type">Type: {asset.asset_type}</p>
                   {asset.description && <p className="asset-description">Description: {asset.description}</p>}
                   <p className="asset-quantity">Quantity Available: {asset.quantity}</p>
-                  
+
                   <div className="asset-status">
                     <span className={`badge badge-${asset.in_stock ? 'success' : 'warning'}`}>
                       {asset.in_stock ? '✓ In Stock' : '✗ Out of Stock'}
@@ -196,6 +212,7 @@ export default function Asset() {
           )}
         </div>
 
+        {/* Borrow request modal */}
         {showBorrowModal && selectedAsset && (
           <div className="modal-overlay" onClick={() => setShowBorrowModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -220,15 +237,8 @@ export default function Asset() {
                       inputMode="numeric"
                       pattern="[0-9]*"
                       value={borrowQuantityInput}
-                      onChange={(e) => {
-                        const next = e.target.value.replace(/\D/g, '');
-                        setBorrowQuantityInput(next);
-                      }}
+                      onChange={(e) => setBorrowQuantityInput(e.target.value.replace(/\D/g, ''))}
                       onBlur={() => {
-                        if (!borrowQuantityInput) {
-                          setBorrowQuantityInput('1');
-                          return;
-                        }
                         let val = parseInt(borrowQuantityInput, 10);
                         if (Number.isNaN(val) || val < 1) val = 1;
                         if (val > selectedAsset.quantity) val = selectedAsset.quantity;
@@ -247,15 +257,8 @@ export default function Asset() {
                       inputMode="numeric"
                       pattern="[0-9]*"
                       value={borrowDays}
-                      onChange={(e) => {
-                        const next = e.target.value.replace(/\D/g, '');
-                        setBorrowDays(next);
-                      }}
+                      onChange={(e) => setBorrowDays(e.target.value.replace(/\D/g, ''))}
                       onBlur={() => {
-                        if (!borrowDays) {
-                          setBorrowDays('1');
-                          return;
-                        }
                         let val = parseInt(borrowDays, 10);
                         if (Number.isNaN(val) || val < 1) val = 1;
                         if (val > 30) val = 30;
@@ -277,18 +280,10 @@ export default function Asset() {
                   </div>
 
                   <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => setShowBorrowModal(false)}
-                    >
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowBorrowModal(false)}>
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={submitting}
-                    >
+                    <button type="submit" className="btn btn-primary" disabled={submitting}>
                       {submitting ? 'Submitting...' : 'Submit Request'}
                     </button>
                   </div>
@@ -296,6 +291,16 @@ export default function Asset() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Notification modal — replaces browser alert() */}
+        {notify && (
+          <NotifyModal
+            type={notify.type}
+            title={notify.title}
+            message={notify.message}
+            onClose={closeNotify}
+          />
         )}
       </div>
     </div>

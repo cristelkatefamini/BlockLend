@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { notificationAPI } from '../utils/api';
 import { formatRelativeTime } from '../utils/time';
+import ChatWidget from './ChatWidget';
 import '../styles/Header.css';
 
 const NOTIFICATION_LABELS = {
@@ -32,9 +33,8 @@ export default function Header() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000);
+    const interval = setInterval(fetchUnreadCount, 15000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
@@ -57,9 +57,7 @@ export default function Header() {
     try {
       const response = await notificationAPI.getUnreadCount();
       setUnreadCount(response.data?.unread_count || 0);
-    } catch {
-      // silently ignore
-    }
+    } catch { /* silent */ }
   };
 
   const fetchNotifications = async () => {
@@ -78,21 +76,15 @@ export default function Header() {
   const toggleNotifications = async () => {
     const next = !showNotifications;
     setShowNotifications(next);
-    if (next) {
-      await fetchNotifications();
-    }
+    if (next) await fetchNotifications();
   };
 
   const handleMarkAsRead = async (id) => {
     try {
       await notificationAPI.markAsRead(id);
-      setNotifications(prev =>
-        prev.map(n => (n.id === id ? { ...n, read: true } : n))
-      );
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const handleMarkAllRead = async () => {
@@ -100,23 +92,17 @@ export default function Header() {
       await notificationAPI.markAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
-  const navClass = ({ isActive }) =>
-    `nav-link${isActive ? ' nav-link--active' : ''}`;
+  const navClass = ({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`;
 
   return (
     <header className="header">
       <div className="header-container">
-        <Link to={isAuthenticated ? '/' : '/'} className="logo">
+        <Link to="/" className="logo">
           <svg className="logo-icon" viewBox="0 0 32 36" aria-hidden="true">
-            <path
-              d="M16 1L2 8v12c0 9.5 6.2 18.3 14 21 7.8-2.7 14-11.5 14-21V8L16 1z"
-              fill="currentColor"
-            />
+            <path d="M16 1L2 8v12c0 9.5 6.2 18.3 14 21 7.8-2.7 14-11.5 14-21V8L16 1z" fill="currentColor" />
           </svg>
           <span className="logo-text">BlockLend</span>
         </Link>
@@ -124,9 +110,18 @@ export default function Header() {
         <nav className="nav">
           {isAuthenticated ? (
             <>
-              <NavLink to="/" end className={navClass}>Home</NavLink>
+              <NavLink to="/home" className={navClass}>Home</NavLink>
               <NavLink to="/assets" className={navClass}>Assets</NavLink>
-              <NavLink to="/transactions" className={navClass}>Transactions</NavLink>
+              {user?.role !== 'admin' && (
+                <NavLink to="/transactions" className={navClass}>Activity</NavLink>
+              )}
+
+              {user?.role !== 'admin' && (
+                <>
+                  <NavLink to="/borrow-history" className={navClass}>Borrow History</NavLink>
+                </>
+              )}
+
               {user?.role === 'admin' && (
                 <div className={`admin-menu${isAdminRoute ? ' admin-menu--active' : ''}`}>
                   <span className="nav-link admin-label">Admin</span>
@@ -139,8 +134,22 @@ export default function Header() {
                   </div>
                 </div>
               )}
+
               <NavLink to="/profile" className={navClass}>Profile</NavLink>
               <NavLink to="/about" className={navClass}>About</NavLink>
+
+              {/* Users: plain nav link to /chat page. Admins: floating ChatWidget dropdown */}
+              {user?.role !== 'admin' ? (
+                <NavLink
+                  to="/chat"
+                  className={({ isActive }) => `nav-link nav-chat-link${isActive ? ' nav-link--active' : ''}`}
+                  aria-label="Support Chat"
+                >
+                  💬 Support
+                </NavLink>
+              ) : (
+                <ChatWidget />
+              )}
             </>
           ) : (
             <>
@@ -208,14 +217,10 @@ export default function Header() {
                 </div>
               )}
               <span className="user-greeting">Welcome, {user?.username}</span>
-              <button className="btn btn-secondary btn-sm" onClick={logout}>
-                Logout
-              </button>
+              <button className="btn btn-secondary btn-sm" onClick={logout}>Logout</button>
             </>
           ) : (
-            <Link to="/" className="btn btn-primary btn-sm">
-              Sign In
-            </Link>
+            <Link to="/" className="btn btn-primary btn-sm">Sign In</Link>
           )}
         </div>
       </div>

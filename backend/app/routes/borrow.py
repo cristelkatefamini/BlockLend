@@ -360,6 +360,16 @@ async def create_borrow(
         if not asset:
             raise HTTPException(status_code=404, detail="Asset not found")
 
+        # Only verified users can borrow
+        users_collection = database.get_collection("users")
+        borrower_doc = users_collection.find_one({"_id": ObjectId(current_user.get("user_id"))})
+        if not borrower_doc or not borrower_doc.get("kyc_verified", False):
+            raise HTTPException(
+                status_code=403,
+                detail="Your account must be verified by an admin before you can borrow assets. "
+                       "Please complete your profile and wait for admin verification.",
+            )
+
         if not is_asset_available(asset):
             raise HTTPException(status_code=400, detail="Asset is not available")
 

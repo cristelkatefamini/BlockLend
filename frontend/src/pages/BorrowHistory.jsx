@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { borrowAPI, penaltyAPI } from '../utils/api';
-import { exportBorrowsPDF } from '../utils/pdfReport';
+import { toast } from '../components/Toast';
 import '../styles/pages/BorrowHistory.css';
 
 export default function BorrowHistory() {
@@ -82,13 +82,6 @@ export default function BorrowHistory() {
               <h1>Borrow History</h1>
               <p>View and manage all your borrowing records</p>
             </div>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => exportBorrowsPDF(borrows)}
-              disabled={loading || borrows.length === 0}
-            >
-              ⬇ Export PDF
-            </button>
           </div>
         </div>
 

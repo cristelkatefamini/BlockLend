@@ -349,8 +349,22 @@ export default function Profile() {
                     <div className="profile-form-fields">
                       <div className="profile-field-row">
                         <label className="profile-field-label">Username</label>
-                        <div className="profile-field-value profile-field-value--static">
+                        <div className="profile-field-value profile-field-value--static" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           {profile?.username}
+                          {profile?.kyc_verified && (
+                            <span className="profile-verified-badge" title="Verified by admin">
+                              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-label="Verified">
+                                <circle cx="12" cy="12" r="11" fill="#27ae60"/>
+                                <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Verified
+                            </span>
+                          )}
+                          {!profile?.kyc_verified && profile?.role !== 'admin' && (
+                            <span className="profile-unverified-badge" title="Pending admin verification">
+                              Pending Verification
+                            </span>
+                          )}
                         </div>
                       </div>
 

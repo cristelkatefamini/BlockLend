@@ -81,6 +81,9 @@ export const userAPI = {
   getUser: (id) => api.get(`/users/${id}`),
   toggleUserStatus: (id) => api.put(`/users/${id}/toggle-status`),
   resetUserWarnings: (id) => api.put(`/users/${id}/reset-warnings`),
+  verifyUser: (id) => api.put(`/users/${id}/verify`),
+  unverifyUser: (id) => api.put(`/users/${id}/unverify`),
+  notifyCredentials: (id) => api.post(`/users/${id}/notify-credentials`),
   deleteUser: (id) => api.delete(`/users/${id}`),
 };
 
@@ -117,6 +120,18 @@ export const notificationAPI = {
 // Penalty endpoints
 export const penaltyAPI = {
   getPenalties: () => api.get('/penalties'),
+};
+
+// Message endpoints
+export const messageAPI = {
+  getMyMessages: () => api.get('/messages/my'),
+  sendMessage: (text) => api.post('/messages/send', { text }),
+  sendAdminReply: (userId, text) => api.post('/messages/send', { user_id: userId, text }),
+  getConversations: () => api.get('/messages/conversations'),
+  getConversation: (userId) => api.get(`/messages/conversation/${userId}`),
+  getUnreadCount: () => api.get('/messages/unread-count'),
+  deleteConversation: () => api.delete('/messages/my'),
+  adminDeleteConversation: (userId) => api.delete(`/messages/conversation/${userId}`),
 };
 
 // Transaction endpoints
